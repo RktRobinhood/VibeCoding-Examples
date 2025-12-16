@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crochet Pattern Studio (Chart + Written)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --border:#d0d0d0; --bg:#fafafa; --ink:#111; --soft:#f5f7ff; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header, main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    header { padding-top: 20px; }
+    .topnav { margin: 0 0 12px 0; }
+    .topnav a { text-decoration: none; color: #0055cc; }
+    .topnav a:hover { text-decoration: underline; }
+
+    h1 { margin: 8px 0 6px; font-size: 22px; }
+    p { margin: 6px 0 12px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 12px;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .row > * { margin: 4px 0; }
+
+    label { font-size: 13px; }
+    input[type="number"], input[type="text"], select {
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+    }
+    input[type="range"] { width: 220px; }
+    input[type="color"]{
+      width: 42px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+    }
+    button {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+    }
+    button:hover { background: #f3f3f3; }
+    button.primary { border-color: #b8d1ff; background: #eaf2ff; }
+    button.primary:hover { background: #dbeaff; }
+
+    .canvasWrap { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 980px) { .canvasWrap { grid-template-columns: 1fr; } }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      image-rendering: pixelated;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .legend .swatch {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+    }
+    .chip {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      flex: 0 0 auto;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12.5px;
+      white-space: pre-wrap;
+      background: #fcfcfc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      overflow: auto;
+      max-height: 520px;
+    }
+
+    .small { font-size: 12px; color: #444; }
+    .divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+    .toolHint {
+      font-size: 12px;
+      color: #333;
+      background: #fff7d6;
+      border: 1px solid #f0df9b;
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    .pill {
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--soft);
+    }
+
+    .hint {
+      background: #f6fff4;
+      border: 1px solid #c9f0c2;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #234a24;
+      margin-top: 8px;
+    }
+
+    .inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .kbd { font-family: ui-monospace, monospace; border: 1px solid var(--border); padding: 1px 6px; border-radius: 6px; background: #fff; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="topnav">
+      <a href="../../index.html">← Back to projects</a>
+    </nav>
+    <h1>Crochet Pattern Studio</h1>
+    <p class="small">
+      Build a chart-style pattern grid, optionally derive it from an image (crop/zoom + pixelate + palette extraction), then export both chart and written instructions.
+    </p>
+  </header>
+
+  <main class="grid">
+    <!-- LEFT: DESIGN + IMAGE IMPORT -->
+    <section class="panel">
+      <h2 style="margin:0 0 10px;">1) Pattern design</h2>
+
+      <div class="row">
+        <label>Width
+          <input id="w" type="number" min="1" max="300" value="24" />
+        </label>
+        <label>Height
+          <input id="h" type="number" min="1" max="300" value="24" />
+        </label>
+        <button id="resizeBtn" class="primary">Resize grid</button>
+
+        <label style="margin-left:auto;">Cell size
+          <input id="cellSize" type="number" min="8" max="40" value="18" />
+        </label>
+        <button id="clearBtn">Clear</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="row">
+        <label>Primary stitch
+          <select id="stitchType">
+            <option value="sc">sc (US) / dc (UK)</option>
+            <option value="hdc">hdc (US) / htr (UK)</option>
+            <option value="dc">dc (US) / tr (UK)</option>
+          </select>
+        </label>
+        <label>Turning chain
+          <select id="turningChain">
+            <option value="auto">Auto</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </label>
+        <label>Work flat
+          <select id="flatMode">
+            <option value="rows">Rows (turn each row)</option>
+            <option value="rowsNoTurn">Rows (no turning, always same direction)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Notation
+          <select id="notation">
+            <option value="us">US terms (sc, hdc, dc)</option>
+            <option value="uk">UK terms (dc, htr, tr)</option>
+          </select>
+        </label>
+
+        <label>Chart symbols
+          <select id="chartSymbols">
+            <option value="standard">Standard-ish (X, T, Ŧ)</option>
+            <option value="abbrev">Abbrev (sc, hdc, dc)</option>
+          </select>
+        </label>
+
+        <label>Start method
+          <select id="startMethod">
+            <option value="chain">Foundation chain</option>
+            <option value="fsc">Foundation (fsc/fdc) note</option>
+            <option value="mr">Magic ring (for rounds) note</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="row">
+        <label>Tool
+          <select id="tool">
+            <option value="paint">Paint cell</option>
+            <option value="erase">Erase (set to background)</option>
+            <option value="fill">Flood fill (same-color region)</option>
+            <option value="pick">Eyedropper (pick color)</option>
+          </select>
+        </label>
+        <label>Brush
+          <select id="brush">
+            <option value="1">1×1</option>
+            <option value="2">2×2</option>
+            <option value="3">3×3</option>
+          </select>
+        </label>
+
+        <span class="inline">
+          <span class="pill">Active</span>
+          <input id="activeColorPicker" type="color" value="#111111" title="Active color" />
+          <input id="activeColorName" type="text" value="A" style="width:120px" title="Active color name" />
+          <button id="updateActiveBtn">Update</button>
+        </span>
+
+        <label>Active index
+          <select id="activeColor"></select>
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="addColorBtn">Add color</button>
+        <button id="removeColorBtn">Remove color</button>
+        <span class="small">Tip: use the color picker + name then click <span class="kbd">Update</span>.</span>
+      </div>
+
+      <div id="legend" class="legend"></div>
+
+      <div class="divider"></div>
+
+      <h3 style="margin:0 0 8px;">Chart editor</h3>
+      <canvas id="patternCanvas" width="800" height="800"></canvas>
+
+      <div class="toolHint">
+        Tip: click/drag to paint. Use “Eyedropper” to pick an existing cell color. Use “Flood fill” to test edge cases.
+      </div>
+
+      <div class="divider"></div>
+
+      <h2 style="margin:0 0 10px;">2) Import image → crop → pixelate → apply</h2>
+
+      <div class="row">
+        <input id="imgFile" type="file" accept="image/*" />
+        <button id="resetCropBtn">Reset view</button>
+        <label>Zoom
+          <input id="zoom" type="range" min="0.5" max="10" step="0.1" value="1" />
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Crop size
+          <input id="cropSize" type="range" min="0.35" max="0.95" step="0.01" value="0.85" />
+        </label>
+        <label>Crop shape
+          <select id="cropShape">
+            <option value="fit">Fit grid aspect</option>
+            <option value="square">Square</option>
+          </select>
+        </label>
+        <span class="small">Drag image to pan inside crop guide.</span>
+      </div>
+
+      <div class="row">
+        <label>Reduce colors (K)
+          <input id="reduce" type="range" min="2" max="16" step="1" value="6" />
+        </label>
+        <label>Quantize quality
+          <select id="quantQuality">
+            <option value="fast">Fast</option>
+            <option value="better">Better (more accurate)</option>
+          </select>
+        </label>
+        <label>
+          <input id="autoPalette" type="checkbox" checked /> Auto-build palette from image
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="applyPaletteBtn">Apply extracted palette</button>
+        <button id="applyImageBtn" class="primary">Apply image to pattern grid</button>
+        <label>
+          <input id="dither" type="checkbox" /> Dither (preview only)
+        </label>
+      </div>
+
+      <div class="canvasWrap">
+        <div>
+          <div class="small" style="margin:6px 0;">Image view (drag to pan)</div>
+          <canvas id="imgCanvas" width="700" height="450"></canvas>
+        </div>
+        <div>
+          <div class="small" style="margin:6px 0;">Pixelated preview</div>
+          <canvas id="pixCanvas" width="700" height="450"></canvas>
+        </div>
+      </div>
+
+      <div class="hint">
+        Import improvements: crop guide matches your grid aspect; palette can be extracted from the crop (K colors), then applied to the pattern.
+      </div>
+
+      <p class="small">
+        Notes: This is optimized for chart-style patterns (tapestry/pixel crochet, filet-style charts). After import, hand-edit cells for accuracy.
+      </p>
+    </section>
+
+    <!-- RIGHT: EXPORT -->
+    <aside class="panel">
+      <h2 style="margin:0 0 10px;">3) Export pattern</h2>
+
+      <div class="row">
+        <button id="exportBtn" class="primary">Generate chart + written instructions</button>
+        <button id="downloadBtn">Download as .txt</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="margin:0 0 8px;">Output</h3>
+      <div id="output" class="mono"></div>
+
+      <div class="divider"></div>
+
+      <details>
+        <summary><strong>Notation reference (what this generator uses)</strong></summary>
+        <div class="small" style="margin-top:8px;">
+          <ul>
+            <li><strong>US:</strong> sl st, ch, sc, hdc, dc</li>
+            <li><strong>UK:</strong> sl st, ch, dc, htr, tr</li>
+            <li><strong>Color changes:</strong> written as “(Color A) … (Color B) …”</li>
+            <li><strong>Rows:</strong> alternating direction in “Rows (turn each row)” mode.</li>
+          </ul>
+        </div>
+      </details>
+    </aside>
+  </main>
+
+<script>
+/* ============================
+   Crochet Pattern Studio
+   - Grid chart editor
+   - Written instruction generator
+   - Image import: pan/zoom + crop-aspect guide + quantize palette + apply
+   ============================ */
+
+/** --------- State ---------- **/
+const state = {
+  gridW: 24,
+  gridH: 24,
+  cellSize: 18,
+  // palette colors (0 = background)
+  palette: [
+    { name: "BG", hex: "#ffffff" },
+    { name: "A",  hex: "#111111" },
+    { name: "B",  hex: "#cc0000" },
+    { name: "C",  hex: "#0066cc" },
+    { name: "D",  hex: "#0a8a3a" },
+    { name: "E",  hex: "#f2b705" }
+  ],
+  activeColor: 1,
+  tool: "paint",
+  brush: 1,
+  grid: [],
+
+  // image view
+  img: null,
+  imgPanX: 0,
+  imgPanY: 0,
+  imgZoom: 1,
+  imgDragging: false,
+  imgLastX: 0,
+  imgLastY: 0,
+
+  // extracted palette from current crop
+  extracted: []
+};
+
+function initGrid(w, h) {
+  state.gridW = w;
+  state.gridH = h;
+  state.grid = Array.from({length: h}, () => Array.from({length: w}, () => 0));
+}
+
+/** --------- DOM ---------- **/
+const el = {
+  w: document.getElementById("w"),
+  h: document.getElementById("h"),
+  cellSize: document.getElementById("cellSize"),
+  resizeBtn: document.getElementById("resizeBtn"),
+  clearBtn: document.getElementById("clearBtn"),
+  tool: document.getElementById("tool"),
+  brush: document.getElementById("brush"),
+  activeColor: document.getElementById("activeColor"),
+  activeColorPicker: document.getElementById("activeColorPicker"),
+  activeColorName: document.getElementById("activeColorName"),
+  updateActiveBtn: document.getElementById("updateActiveBtn"),
+  addColorBtn: document.getElementById("addColorBtn"),
+  removeColorBtn: document.getElementById("removeColorBtn"),
+  legend: document.getElementById("legend"),
+
+  stitchType: document.getElementById("stitchType"),
+  turningChain: document.getElementById("turningChain"),
+  flatMode: document.getElementById("flatMode"),
+  notation: document.getElementById("notation"),
+  chartSymbols: document.getElementById("chartSymbols"),
+  startMethod: document.getElementById("startMethod"),
+
+  patternCanvas: document.getElementById("patternCanvas"),
+  imgFile: document.getElementById("imgFile"),
+  imgCanvas: document.getElementById("imgCanvas"),
+  pixCanvas: document.getElementById("pixCanvas"),
+  resetCropBtn: document.getElementById("resetCropBtn"),
+  zoom: document.getElementById("zoom"),
+  cropSize: document.getElementById("cropSize"),
+  cropShape: document.getElementById("cropShape"),
+  reduce: document.getElementById("reduce"),
+  quantQuality: document.getElementById("quantQuality"),
+  autoPalette: document.getElementById("autoPalette"),
+  applyPaletteBtn: document.getElementById("applyPaletteBtn"),
+  applyImageBtn: document.getElementById("applyImageBtn"),
+  dither: document.getElementById("dither"),
+
+  exportBtn: document.getElementById("exportBtn"),
+  downloadBtn: document.getElementById("downloadBtn"),
+  output: document.getElementById("output")
+};
+
+const pctx = el.patternCanvas.getContext("2d");
+const ictx = el.imgCanvas.getContext("2d");
+const xctx = el.pixCanvas.getContext("2d");
+
+/** --------- Helpers ---------- **/
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+function hexToRgb(hex) {
+  const s = hex.replace("#", "").trim();
+  const v = s.length === 3 ? s.split("").map(c => c+c).join("") : s;
+  const n = parseInt(v, 16);
+  return { r: (n>>16)&255, g: (n>>8)&255, b: n&255 };
+}
+function rgbToHex({r,g,b}) {
+  const h = (n)=>n.toString(16).padStart(2,"0");
+  return "#" + h(r) + h(g) + h(b);
+}
+function dist2(a,b){ const dr=a.r-b.r, dg=a.g-b.g, db=a.b-b.b; return dr*dr+dg*dg+db*db; }
+
+function getTurningChain(stitchKey) {
+  if (stitchKey === "sc") return 1;
+  if (stitchKey === "hdc") return 2;
+  if (stitchKey === "dc") return 3;
+  return 1;
+}
+
+function stitchTerms(key, notation) {
+  if (notation === "us") {
+    return { sc:"sc", hdc:"hdc", dc:"dc" }[key] || key;
+  }
+  return { sc:"dc", hdc:"htr", dc:"tr" }[key] || key;
+}
+
+function chartSymbolForStitch(key, mode) {
+  if (mode === "abbrev") return key;
+  if (key === "sc") return "X";
+  if (key === "hdc") return "T";
+  if (key === "dc") return "Ŧ";
+  return "?";
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+
+function ensureActiveColorOptions() {
+  el.activeColor.innerHTML = "";
+  state.palette.forEach((c, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = `${idx}: ${c.name}`;
+    el.activeColor.appendChild(opt);
+  });
+  el.activeColor.value = String(state.activeColor);
+  syncActiveEditorFromIndex();
+  renderLegend();
+}
+
+function syncActiveEditorFromIndex(){
+  const c = state.palette[state.activeColor] || state.palette[1];
+  el.activeColorPicker.value = c.hex;
+  el.activeColorName.value = c.name;
+}
+
+function renderLegend() {
+  el.legend.innerHTML = "";
+  state.palette.forEach((c, idx) => {
+    const div = document.createElement("div");
+    div.className = "swatch";
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.style.background = c.hex;
+
+    const meta = document.createElement("div");
+    meta.innerHTML = `<div><strong>${idx}: ${escapeHtml(c.name)}</strong></div>
+                      <div class="small">${escapeHtml(c.hex)}</div>`;
+    div.appendChild(chip);
+    div.appendChild(meta);
+    el.legend.appendChild(div);
+  });
+}
+
+/** --------- Pattern Canvas ---------- **/
+function resizePatternCanvasToGrid() {
+  const pxW = state.gridW * state.cellSize;
+  const pxH = state.gridH * state.cellSize;
+  el.patternCanvas.width = Math.max(200, pxW);
+  el.patternCanvas.height = Math.max(200, pxH);
+}
+
+function drawPattern() {
+  resizePatternCanvasToGrid();
+  pctx.clearRect(0,0,el.patternCanvas.width, el.patternCanvas.height);
+
+  for (let r=0; r<state.gridH; r++) {
+    for (let c=0; c<state.gridW; c++) {
+      const idx = state.grid[r][c];
+      pctx.fillStyle = state.palette[idx]?.hex || "#ffffff";
+      pctx.fillRect(c*state.cellSize, r*state.cellSize, state.cellSize, state.cellSize);
+      pctx.strokeStyle = "#e5e5e5";
+      pctx.strokeRect(c*state.cellSize, r*state.cellSize, state.cellSize, state.cellSize);
+    }
+  }
+}
+
+function gridCoordFromEvent(evt) {
+  const rect = el.patternCanvas.getBoundingClientRect();
+  const x = (evt.clientX - rect.left) * (el.patternCanvas.width / rect.width);
+  const y = (evt.clientY - rect.top) * (el.patternCanvas.height / rect.height);
+  const c = Math.floor(x / state.cellSize);
+  const r = Math.floor(y / state.cellSize);
+  return { r, c };
+}
+
+function applyBrushAt(r, c, colorIdx) {
+  const b = state.brush;
+  const half = Math.floor(b/2);
+  for (let rr=r-half; rr<=r-half+(b-1); rr++) {
+    for (let cc=c-half; cc<=c-half+(b-1); cc++) {
+      if (rr>=0 && rr<state.gridH && cc>=0 && cc<state.gridW) {
+        state.grid[rr][cc] = colorIdx;
+      }
+    }
+  }
+}
+
+function floodFill(r, c, target, replacement) {
+  if (target === replacement) return;
+  const stack = [{r,c}];
+  while (stack.length) {
+    const cur = stack.pop();
+    if (cur.r<0 || cur.r>=state.gridH || cur.c<0 || cur.c>=state.gridW) continue;
+    if (state.grid[cur.r][cur.c] !== target) continue;
+    state.grid[cur.r][cur.c] = replacement;
+    stack.push({r:cur.r+1,c:cur.c});
+    stack.push({r:cur.r-1,c:cur.c});
+    stack.push({r:cur.r,c:cur.c+1});
+    stack.push({r:cur.r,c:cur.c-1});
+  }
+}
+
+let painting = false;
+el.patternCanvas.addEventListener("mousedown", (e) => {
+  painting = true;
+  handlePaint(e);
+});
+el.patternCanvas.addEventListener("mousemove", (e) => {
+  if (!painting) return;
+  handlePaint(e);
+});
+window.addEventListener("mouseup", () => painting = false);
+
+function handlePaint(e) {
+  const {r,c} = gridCoordFromEvent(e);
+  if (r<0 || r>=state.gridH || c<0 || c>=state.gridW) return;
+
+  const tool = state.tool;
+  if (tool === "paint") {
+    applyBrushAt(r,c,state.activeColor);
+  } else if (tool === "erase") {
+    applyBrushAt(r,c,0);
+  } else if (tool === "fill") {
+    const tgt = state.grid[r][c];
+    floodFill(r,c,tgt,state.activeColor);
+  } else if (tool === "pick") {
+    state.activeColor = state.grid[r][c];
+    el.activeColor.value = String(state.activeColor);
+    syncActiveEditorFromIndex();
+  }
+  drawPattern();
+}
+
+/** --------- Image Import / Pan / Zoom ---------- **/
+function getCropGuide() {
+  const cw = el.imgCanvas.width, ch = el.imgCanvas.height;
+  const size = parseFloat(el.cropSize.value);
+
+  let guideW = cw * size;
+  let guideH = ch * size;
+
+  if (el.cropShape.value === "square") {
+    const s = Math.min(guideW, guideH);
+    guideW = s;
+    guideH = s;
+  } else {
+    // Fit grid aspect
+    const aspect = state.gridW / state.gridH;
+    const current = guideW / guideH;
+    if (current > aspect) {
+      guideW = guideH * aspect;
+    } else {
+      guideH = guideW / aspect;
+    }
+  }
+
+  const gx = (cw-guideW)/2;
+  const gy = (ch-guideH)/2;
+  return { gx, gy, guideW, guideH, cw, ch };
+}
+
+function drawImageView() {
+  ictx.clearRect(0,0,el.imgCanvas.width, el.imgCanvas.height);
+  if (!state.img) {
+    ictx.fillStyle = "#888";
+    ictx.font = "14px system-ui";
+    ictx.fillText("Load an image to begin.", 12, 24);
+    xctx.clearRect(0,0,el.pixCanvas.width, el.pixCanvas.height);
+    return;
+  }
+
+  const img = state.img;
+  const cw = el.imgCanvas.width, ch = el.imgCanvas.height;
+  const zw = img.width * state.imgZoom;
+  const zh = img.height * state.imgZoom;
+
+  // Clamp pan so image stays near canvas
+  const minX = -zw + 40, maxX = cw - 40;
+  const minY = -zh + 40, maxY = ch - 40;
+  state.imgPanX = clamp(state.imgPanX, minX, maxX);
+  state.imgPanY = clamp(state.imgPanY, minY, maxY);
+
+  ictx.drawImage(img, state.imgPanX, state.imgPanY, zw, zh);
+
+  // crop guide
+  const g = getCropGuide();
+  ictx.save();
+  ictx.strokeStyle = "rgba(0,0,0,0.5)";
+  ictx.lineWidth = 2;
+  ictx.strokeRect(g.gx, g.gy, g.guideW, g.guideH);
+  ictx.fillStyle = "rgba(0,0,0,0.08)";
+  // mask outside
+  ictx.beginPath();
+  ictx.rect(0,0,g.cw,g.ch);
+  ictx.rect(g.gx, g.gy, g.guideW, g.guideH);
+  ictx.fill("evenodd");
+  ictx.restore();
+
+  drawPixelatedPreview();
+}
+
+el.imgCanvas.addEventListener("mousedown", (e) => {
+  state.imgDragging = true;
+  state.imgLastX = e.clientX;
+  state.imgLastY = e.clientY;
+});
+window.addEventListener("mouseup", () => state.imgDragging = false);
+window.addEventListener("mousemove", (e) => {
+  if (!state.imgDragging) return;
+  const dx = e.clientX - state.imgLastX;
+  const dy = e.clientY - state.imgLastY;
+  state.imgLastX = e.clientX;
+  state.imgLastY = e.clientY;
+  state.imgPanX += dx;
+  state.imgPanY += dy;
+  drawImageView();
+});
+
+el.zoom.addEventListener("input", () => {
+  state.imgZoom = parseFloat(el.zoom.value);
+  drawImageView();
+});
+
+el.cropSize.addEventListener("input", drawImageView);
+el.cropShape.addEventListener("change", drawImageView);
+el.reduce.addEventListener("input", drawImageView);
+el.quantQuality.addEventListener("change", drawImageView);
+el.dither.addEventListener("change", drawImageView);
+
+el.resetCropBtn.addEventListener("click", () => {
+  state.imgPanX = 0;
+  state.imgPanY = 0;
+  state.imgZoom = 1;
+  el.zoom.value = "1";
+  drawImageView();
+});
+
+el.imgFile.addEventListener("change", async () => {
+  const f = el.imgFile.files?.[0];
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = () => {
+    state.img = img;
+    state.imgPanX = 0;
+    state.imgPanY = 0;
+    state.imgZoom = parseFloat(el.zoom.value);
+    drawImageView();
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+});
+
+function getCroppedImageData() {
+  const g = getCropGuide();
+  const off = document.createElement("canvas");
+  off.width = g.cw;
+  off.height = g.ch;
+  const octx = off.getContext("2d");
+  octx.drawImage(state.img, state.imgPanX, state.imgPanY, state.img.width*state.imgZoom, state.img.height*state.imgZoom);
+  return octx.getImageData(g.gx, g.gy, g.guideW, g.guideH);
+}
+
+/**
+ * K-means quantization (small & deterministic-ish).
+ * quality: 'fast' = fewer iterations, sub-sampling
+ */
+function kMeansQuantize(imageData, k, quality) {
+  const data = imageData.data;
+  const n = data.length / 4;
+
+  // sample stride
+  const stride = (quality === "better") ? 1 : 3;
+
+  // init centroids by sampling evenly
+  const centroids = [];
+  const step = Math.max(1, Math.floor((n) / k));
+  for (let i=0; i<k; i++) {
+    const idx = Math.min(n-1, i*step);
+    const p = idx*4;
+    centroids.push({ r:data[p], g:data[p+1], b:data[p+2] });
+  }
+
+  const iters = (quality === "better") ? 10 : 5;
+  for (let iter=0; iter<iters; iter++) {
+    const sums = centroids.map(()=>({r:0,g:0,b:0,n:0}));
+    for (let i=0; i<n; i+=stride) {
+      const p = i*4;
+      const pix = { r:data[p], g:data[p+1], b:data[p+2] };
+      let best=0, bd=Infinity;
+      for (let c=0;c<centroids.length;c++){
+        const d2 = dist2(pix, centroids[c]);
+        if (d2<bd){bd=d2;best=c;}
+      }
+      const s = sums[best];
+      s.r += pix.r; s.g += pix.g; s.b += pix.b; s.n++;
+    }
+    for (let c=0;c<centroids.length;c++){
+      const s = sums[c];
+      if (s.n>0) centroids[c] = { r:Math.round(s.r/s.n), g:Math.round(s.g/s.n), b:Math.round(s.b/s.n) };
+    }
+  }
+
+  // sort centroids by luminance (stable-ish) to keep ordering predictable
+  centroids.sort((a,b)=> (0.2126*a.r+0.7152*a.g+0.0722*a.b) - (0.2126*b.r+0.7152*b.g+0.0722*b.b));
+  return centroids;
+}
+
+function applyPaletteToPixels(imgData, palette, useDither) {
+  const d = imgData.data;
+  // Floyd–Steinberg dithering (preview only)
+  const w = imgData.width, h = imgData.height;
+
+  function nearest(rgb) {
+    let best=0, bd=Infinity;
+    for (let i=0;i<palette.length;i++){
+      const dd = dist2(rgb, palette[i]);
+      if (dd<bd){bd=dd;best=i;}
+    }
+    return best;
+  }
+
+  if (!useDither) {
+    for (let i=0;i<d.length;i+=4){
+      const pix = {r:d[i], g:d[i+1], b:d[i+2]};
+      const bi = nearest(pix);
+      d[i]=palette[bi].r; d[i+1]=palette[bi].g; d[i+2]=palette[bi].b; d[i+3]=255;
+    }
+    return;
+  }
+
+  // Dither: operate on float buffer
+  const buf = new Float32Array(d.length);
+  for (let i=0;i<d.length;i++) buf[i]=d[i];
+
+  function idx(x,y){ return (y*w + x)*4; }
+
+  for (let y=0; y<h; y++){
+    for (let x=0; x<w; x++){
+      const p = idx(x,y);
+      const old = { r:buf[p], g:buf[p+1], b:buf[p+2] };
+      const bi = nearest(old);
+      const neu = palette[bi];
+
+      // write
+      buf[p]=neu.r; buf[p+1]=neu.g; buf[p+2]=neu.b; buf[p+3]=255;
+
+      // error
+      const er = old.r - neu.r;
+      const eg = old.g - neu.g;
+      const eb = old.b - neu.b;
+
+      // distribute
+      const spread = [
+        {dx:1, dy:0, w:7/16},
+        {dx:-1,dy:1, w:3/16},
+        {dx:0, dy:1, w:5/16},
+        {dx:1, dy:1, w:1/16}
+      ];
+      for (const s of spread){
+        const nx = x + s.dx, ny = y + s.dy;
+        if (nx<0 || nx>=w || ny<0 || ny>=h) continue;
+        const q = idx(nx,ny);
+        buf[q]   += er*s.w;
+        buf[q+1] += eg*s.w;
+        buf[q+2] += eb*s.w;
+      }
+    }
+  }
+
+  // clamp back into ImageData
+  for (let i=0;i<d.length;i+=4){
+    d[i]   = clamp(Math.round(buf[i]), 0, 255);
+    d[i+1] = clamp(Math.round(buf[i+1]), 0, 255);
+    d[i+2] = clamp(Math.round(buf[i+2]), 0, 255);
+    d[i+3] = 255;
+  }
+}
+
+function drawPixelatedPreview() {
+  xctx.clearRect(0,0,el.pixCanvas.width, el.pixCanvas.height);
+  if (!state.img) return;
+
+  const k = parseInt(el.reduce.value, 10);
+  const quality = el.quantQuality.value;
+  const dither = el.dither.checked;
+
+  // crop current view
+  const crop = getCroppedImageData();
+
+  // scale down to grid size directly (better mental model than arbitrary "pix")
+  const targetW = state.gridW;
+  const targetH = state.gridH;
+
+  const src = document.createElement("canvas");
+  src.width = crop.width; src.height = crop.height;
+  src.getContext("2d").putImageData(crop,0,0);
+
+  const small = document.createElement("canvas");
+  small.width = targetW;
+  small.height = targetH;
+  const sctx = small.getContext("2d");
+  sctx.imageSmoothingEnabled = true;
+  sctx.drawImage(src, 0,0, crop.width, crop.height, 0,0, targetW, targetH);
+
+  const imgData = sctx.getImageData(0,0,targetW,targetH);
+  const centroids = kMeansQuantize(imgData, k, quality);
+  state.extracted = centroids.map(c => ({ name:"", hex: rgbToHex(c), rgb:c }));
+
+  // apply quantization (and optional dithering) to preview
+  applyPaletteToPixels(imgData, centroids, dither);
+  sctx.putImageData(imgData,0,0);
+
+  xctx.imageSmoothingEnabled = false;
+  xctx.drawImage(small, 0,0, el.pixCanvas.width, el.pixCanvas.height);
+}
+
+/** --------- Palette management ---------- **/
+function addColorWithPicker() {
+  const name = (el.activeColorName.value || "New").trim();
+  const hex = (el.activeColorPicker.value || "#888888").trim();
+
+  // ensure uniqueness of name if duplicated
+  let finalName = name;
+  const existing = new Set(state.palette.map(c=>c.name));
+  if (existing.has(finalName)) {
+    let i=2;
+    while (existing.has(`${finalName} ${i}`)) i++;
+    finalName = `${finalName} ${i}`;
+  }
+
+  state.palette.push({ name: finalName, hex });
+  state.activeColor = state.palette.length - 1;
+  ensureActiveColorOptions();
+  drawPattern();
+}
+
+function removeColor() {
+  if (state.palette.length <= 2) {
+    alert("Keep at least BG + 1 color.");
+    return;
+  }
+  const idx = parseInt(prompt(`Remove which color index? (1..${state.palette.length-1})`, String(state.palette.length-1)), 10);
+  if (!Number.isFinite(idx) || idx <= 0 || idx >= state.palette.length) return;
+
+  for (let r=0;r<state.gridH;r++){
+    for (let c=0;c<state.gridW;c++){
+      const v = state.grid[r][c];
+      if (v === idx) state.grid[r][c] = 0;
+      else if (v > idx) state.grid[r][c] = v - 1;
+    }
+  }
+  state.palette.splice(idx,1);
+  state.activeColor = clamp(state.activeColor, 1, state.palette.length-1);
+  ensureActiveColorOptions();
+  drawPattern();
+}
+
+function updateActiveColorDef() {
+  const idx = parseInt(el.activeColor.value, 10);
+  if (!Number.isFinite(idx) || idx < 0 || idx >= state.palette.length) return;
+  if (idx === 0) {
+    alert("BG (index 0) can be changed, but keep it as background for best results.");
+  }
+  state.palette[idx].hex = el.activeColorPicker.value;
+  state.palette[idx].name = (el.activeColorName.value || state.palette[idx].name).trim();
+  ensureActiveColorOptions();
+  drawPattern();
+}
+
+function applyExtractedPalette() {
+  if (!state.extracted.length) {
+    alert("Load an image and adjust crop/zoom first; the preview will extract a palette.");
+    return;
+  }
+  // Keep BG, replace colors 1.. with extracted K colors (converted to names C1..)
+  const k = state.extracted.length;
+  const bg = state.palette[0];
+  const newPal = [bg];
+  for (let i=0;i<k;i++) {
+    newPal.push({ name: `C${i+1}`, hex: state.extracted[i].hex });
+  }
+  state.palette = newPal;
+  state.activeColor = Math.min(1, state.palette.length-1);
+  ensureActiveColorOptions();
+  drawPattern();
+}
+
+/** --------- Apply image to pattern grid ---------- **/
+function nearestPaletteIndex(rgb) {
+  let best = 0;
+  let bd = Infinity;
+  for (let i=0;i<state.palette.length;i++){
+    const prgb = hexToRgb(state.palette[i].hex);
+    const dd = dist2(rgb, prgb);
+    if (dd<bd){bd=dd;best=i;}
+  }
+  return best;
+}
+
+el.applyImageBtn.addEventListener("click", () => {
+  if (!state.img) {
+    alert("Load an image first.");
+    return;
+  }
+
+  if (el.autoPalette.checked) {
+    // Extract + apply palette first (BG + K colors)
+    applyExtractedPalette();
+  }
+
+  const w = state.gridW, h = state.gridH;
+
+  const crop = getCroppedImageData();
+  const src = document.createElement("canvas");
+  src.width = crop.width; src.height = crop.height;
+  src.getContext("2d").putImageData(crop,0,0);
+
+  const temp = document.createElement("canvas");
+  temp.width = w;
+  temp.height = h;
+  const tctx = temp.getContext("2d");
+  tctx.imageSmoothingEnabled = true;
+  tctx.drawImage(src, 0,0, crop.width,crop.height, 0,0, w,h);
+
+  const id = tctx.getImageData(0,0,w,h).data;
+
+  for (let r=0; r<h; r++){
+    for (let c=0; c<w; c++){
+      const i = (r*w + c) * 4;
+      const rgb = {r:id[i], g:id[i+1], b:id[i+2]};
+      state.grid[r][c] = nearestPaletteIndex(rgb);
+    }
+  }
+  drawPattern();
+});
+
+/** --------- Export: chart + written instructions ---------- **/
+function compressRuns(arr) {
+  const out = [];
+  for (const v of arr) {
+    if (!out.length || out[out.length-1].idx !== v) out.push({idx:v, count:1});
+    else out[out.length-1].count++;
+  }
+  return out;
+}
+
+function rowWorkingOrder(rowIdx, flatMode) {
+  if (flatMode === "rows") {
+    const isOdd = ((rowIdx+1) % 2) === 1;
+    return isOdd ? "L2R" : "R2L";
+  }
+  return "L2R";
+}
+
+function buildChartText(stitchKey, symbolMode) {
+  const sym = chartSymbolForStitch(stitchKey, symbolMode);
+  const lines = [];
+  for (let r=state.gridH-1; r>=0; r--) {
+    const line = [];
+    for (let c=0; c<state.gridW; c++) {
+      const idx = state.grid[r][c];
+      if (idx === 0) line.push("·");
+      else line.push(sym);
+    }
+    lines.push(line.join(" "));
+  }
+  return lines.join("\n");
+}
+
+function buildWrittenInstructions(stitchKey, notation, flatMode, startMethod, turningChainSetting) {
+  const st = stitchTerms(stitchKey, notation);
+  const w = state.gridW;
+
+  const autoTC = getTurningChain(stitchKey);
+  const tc = (turningChainSetting === "auto") ? autoTC : parseInt(turningChainSetting,10);
+
+  const lines = [];
+  lines.push(`PATTERN (generated)`);
+  lines.push(`Grid: ${state.gridW} sts × ${state.gridH} rows`);
+  lines.push(`Stitch: ${st} (${notation.toUpperCase()} terms)`);
+  lines.push(`Turning chain: ${tc === 0 ? "none" : "ch " + tc}`);
+  lines.push(`Work mode: ${flatMode === "rows" ? "rows with turning" : "rows (no turning)"}\n`);
+
+  if (startMethod === "chain") {
+    lines.push(`Foundation: ch ${w + Math.max(tc,1)} (includes turning chain).`);
+    lines.push(`Row 1 setup: work ${st} in 2nd ch from hook and across to end. (${w} sts)`);
+  } else if (startMethod === "fsc") {
+    lines.push(`Foundation: work a foundation row to ${w} sts (e.g., fsc/fdc equivalent for your stitch choice).`);
+  } else if (startMethod === "mr") {
+    lines.push(`Note: Magic ring is typically for rounds; this generator outputs a flat chart-style pattern.`);
+  }
+  lines.push("");
+
+  for (let r=0; r<state.gridH; r++) {
+    const dir = rowWorkingOrder(r, flatMode);
+    const isRS = (flatMode === "rows") ? (((r+1)%2)===1) : true;
+    const labelSide = isRS ? "RS" : "WS";
+
+    const row = state.grid[r].slice();
+    const ordered = (dir === "L2R") ? row : row.slice().reverse();
+    const runs = compressRuns(ordered);
+
+    const parts = [];
+    for (const run of runs) {
+      const cname = state.palette[run.idx]?.name ?? `C${run.idx}`;
+      parts.push(`(${cname}) ${run.count} ${st}`);
+    }
+
+    if (r === 0) {
+      lines.push(`Row 1 (${labelSide}, ${dir}): ${parts.join(", ")}. (${w} sts)`);
+    } else {
+      const tch = (tc>0 && flatMode==="rows") ? `ch ${tc}, turn. ` : "";
+      lines.push(`Row ${r+1} (${labelSide}, ${dir}): ${tch}${parts.join(", ")}. (${w} sts)`);
+    }
+  }
+
+  lines.push("");
+  lines.push(`FINISHING: fasten off; weave in ends; block if desired.`);
+  lines.push(`ABBREVIATIONS: ch=chain, sl st=slip stitch, ${st}=${stitchKey} in selected notation.`);
+  return lines.join("\n");
+}
+
+function generateOutput() {
+  const stitchKey = el.stitchType.value;
+  const notation = el.notation.value;
+  const symbolMode = el.chartSymbols.value;
+  const flatMode = el.flatMode.value;
+  const startMethod = el.startMethod.value;
+  const tcSetting = el.turningChain.value;
+
+  const chart = buildChartText(stitchKey, symbolMode);
+  const written = buildWrittenInstructions(stitchKey, notation, flatMode, startMethod, tcSetting);
+
+  const legendLines = state.palette.map((c, idx) => `${idx}: ${c.name} ${c.hex}`).join("\n");
+  const chartKey = (el.chartSymbols.value === "standard")
+    ? `Chart key: ${chartSymbolForStitch(stitchKey,"standard")} = ${stitchTerms(stitchKey, notation)}`
+    : `Chart key: cells show stitch abbrev`;
+
+  return [
+    written,
+    "—".repeat(60),
+    "COLOR LEGEND",
+    legendLines,
+    "—".repeat(60),
+    "CHART (top row shown first)",
+    chartKey,
+    chart
+  ].join("\n");
+}
+
+/** --------- Download ---------- **/
+function downloadText(filename, text) {
+  const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/** --------- Wire events ---------- **/
+el.resizeBtn.addEventListener("click", () => {
+  const nw = clamp(parseInt(el.w.value,10)||1, 1, 300);
+  const nh = clamp(parseInt(el.h.value,10)||1, 1, 300);
+
+  const old = state.grid;
+  const oldW = state.gridW, oldH = state.gridH;
+  initGrid(nw, nh);
+  for (let r=0;r<Math.min(oldH, nh); r++){
+    for (let c=0;c<Math.min(oldW, nw); c++){
+      state.grid[r][c] = old[r][c];
+    }
+  }
+  drawPattern();
+  drawImageView();
+});
+
+el.clearBtn.addEventListener("click", () => {
+  if (!confirm("Clear the grid?")) return;
+  initGrid(state.gridW, state.gridH);
+  drawPattern();
+});
+
+el.cellSize.addEventListener("input", () => {
+  state.cellSize = clamp(parseInt(el.cellSize.value,10)||18, 8, 40);
+  drawPattern();
+});
+
+el.tool.addEventListener("change", () => state.tool = el.tool.value);
+el.brush.addEventListener("change", () => state.brush = parseInt(el.brush.value,10));
+
+el.activeColor.addEventListener("change", () => {
+  state.activeColor = parseInt(el.activeColor.value,10);
+  syncActiveEditorFromIndex();
+});
+
+el.updateActiveBtn.addEventListener("click", updateActiveColorDef);
+
+el.addColorBtn.addEventListener("click", addColorWithPicker);
+el.removeColorBtn.addEventListener("click", removeColor);
+
+el.applyPaletteBtn.addEventListener("click", applyExtractedPalette);
+
+el.exportBtn.addEventListener("click", () => {
+  const out = generateOutput();
+  el.output.textContent = out;
+});
+
+el.downloadBtn.addEventListener("click", () => {
+  const out = el.output.textContent || generateOutput();
+  downloadText("crochet-pattern.txt", out);
+});
+
+/** --------- Init ---------- **/
+initGrid(state.gridW, state.gridH);
+ensureActiveColorOptions();
+drawPattern();
+drawImageView();
+el.output.textContent = generateOutput();
+</script>
+</body>
+</html>

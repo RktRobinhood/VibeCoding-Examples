@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IB Essay Writing Lab</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#0f1733;
+      --panel2:#101b3d;
+      --ink:#e9ecff;
+      --muted:#b8c0ff;
+      --border:rgba(255,255,255,0.12);
+      --good:#2dd4bf;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --accent:#7c3aed;
+      --accent2:#22c55e;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 15% 10%, rgba(124,58,237,0.35), transparent 60%),
+                  radial-gradient(1200px 600px at 80% 10%, rgba(34,197,94,0.22), transparent 55%),
+                  linear-gradient(180deg, #070a14, var(--bg));
+      color:var(--ink);
+    }
+    a{ color:#9ac6ff; text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+    header{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px 16px 10px;
+    }
+    .topnav{ margin-bottom:10px; }
+    .titleRow{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:10px; }
+    h1{ margin:0; font-size:22px; letter-spacing:0.2px; }
+    .sub{
+      margin:8px 0 0;
+      color:rgba(233,236,255,0.78);
+      max-width:980px;
+      line-height:1.4;
+      font-size:13px;
+    }
+    .pillRow{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .pill{
+      font-size:12px;
+      padding:5px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:rgba(255,255,255,0.04);
+      color:rgba(233,236,255,0.85);
+    }
+
+    main{
+      max-width:1200px;
+      margin:0 auto;
+      padding:12px 16px 28px;
+      display:grid;
+      grid-template-columns: 0.45fr 0.55fr;
+      gap:12px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      main{ grid-template-columns:1fr; }
+    }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+      overflow:hidden;
+    }
+    .panelHeader{
+      padding:12px 12px 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-bottom:1px solid var(--border);
+    }
+    .panelHeader h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:0.2px;
+    }
+    .panelBody{ padding:12px; }
+
+    .tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+    .tab{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.04);
+      color:rgba(233,236,255,0.9);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{
+      background: rgba(124,58,237,0.25);
+      border-color: rgba(124,58,237,0.55);
+    }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    label{ font-size:12px; color:rgba(233,236,255,0.85); }
+    select, input[type="text"], textarea{
+      background: rgba(0,0,0,0.2);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:8px 10px;
+      color:var(--ink);
+      outline:none;
+    }
+    textarea{ width:100%; min-height:90px; resize:vertical; }
+    button{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color:var(--ink);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:12px;
+      cursor:pointer;
+    }
+    button.primary{
+      background: rgba(124,58,237,0.28);
+      border-color: rgba(124,58,237,0.65);
+    }
+    button.good{
+      background: rgba(34,197,94,0.20);
+      border-color: rgba(34,197,94,0.55);
+    }
+    button.warn{
+      background: rgba(251,191,36,0.16);
+      border-color: rgba(251,191,36,0.5);
+    }
+    button.bad{
+      background: rgba(251,113,133,0.16);
+      border-color: rgba(251,113,133,0.55);
+    }
+    button:hover{ filter:brightness(1.07); }
+
+    .legend{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:5px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .dot{ width:10px; height:10px; border-radius:999px; display:inline-block; }
+
+    .workArea{
+      padding:12px;
+      border-top:1px solid var(--border);
+      background: rgba(0,0,0,0.12);
+    }
+
+    .textBox{
+      background: rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      line-height:1.55;
+      font-size:13px;
+      color:rgba(233,236,255,0.95);
+      max-height: 520px;
+      overflow:auto;
+    }
+    .sentence{
+      display:inline;
+      padding:2px 3px;
+      border-radius:8px;
+      cursor:pointer;
+      transition: background 140ms ease, box-shadow 140ms ease;
+    }
+    .sentence:hover{
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.20) inset;
+    }
+
+    /* Student labels */
+    .s-thesis{ background: rgba(124,58,237,0.25); box-shadow:0 0 0 1px rgba(124,58,237,0.55) inset; }
+    .s-topic{  background: rgba(34,197,94,0.18); box-shadow:0 0 0 1px rgba(34,197,94,0.55) inset; }
+    .s-evid{   background: rgba(59,130,246,0.18); box-shadow:0 0 0 1px rgba(59,130,246,0.55) inset; }
+    .s-conc{   background: rgba(251,191,36,0.18); box-shadow:0 0 0 1px rgba(251,191,36,0.55) inset; }
+
+    /* Model overlay */
+    .m-thesis{ outline: 2px solid rgba(124,58,237,0.85); outline-offset: 2px; }
+    .m-topic{  outline: 2px solid rgba(34,197,94,0.85); outline-offset: 2px; }
+    .m-evid{   outline: 2px solid rgba(59,130,246,0.85); outline-offset: 2px; }
+    .m-conc{   outline: 2px solid rgba(251,191,36,0.85); outline-offset: 2px; }
+
+    .scoreGrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width: 980px){ .scoreGrid{ grid-template-columns:1fr; } }
+
+    .card{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      background: rgba(255,255,255,0.03);
+    }
+    .card h3{ margin:0 0 6px; font-size:13px; }
+    .metric{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:rgba(233,236,255,0.88); }
+    .bar{
+      margin-top:7px;
+      height:10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,0.25);
+      overflow:hidden;
+    }
+    .fill{ height:100%; width:0%; background: rgba(34,197,94,0.55); }
+
+    .callout{
+      margin-top:10px;
+      padding:10px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+      color: rgba(233,236,255,0.9);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    /* Paragraph puzzle */
+    .puzzleWrap{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 980px){ .puzzleWrap{ grid-template-columns:1fr; } }
+
+    .slot, .bankItem{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      background: rgba(255,255,255,0.03);
+      font-size:13px;
+      line-height:1.4;
+    }
+    .slot{
+      min-height:52px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .slot .slotLabel{ font-size:11px; color:rgba(233,236,255,0.68); }
+    .slot .slotText{ flex:1; }
+
+    .bankItem{ cursor:grab; }
+    .bankItem:active{ cursor:grabbing; }
+
+    .statusPill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:5px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      padding:2px 6px;
+      border-radius:8px;
+      font-size:12px;
+    }
+
+    .small{ font-size:12px; color:rgba(233,236,255,0.75); }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:5px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: rgba(233,236,255,0.9);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="topnav">
+      <a href="../../index.html">← Back to projects</a>
+    </nav>
+
+    <div class="titleRow">
+      <div>
+        <h1>IB Essay Writing Lab</h1>
+        <p class="sub">
+          A static, curriculum-relevant practice tool to help students <strong>identify</strong> and <strong>construct</strong> thesis statements, topic sentences, evidence/development, and conclusions.
+          No API calls. Immediate feedback. Built for GitHub Pages.
+        </p>
+        <div class="pillRow">
+          <span class="pill">Module A: Essay X-Ray (highlight & compare)</span>
+          <span class="pill">Module B: Paragraph Puzzle (reorder sentences)</span>
+        </div>
+      </div>
+      <div class="pillRow">
+        <span class="pill">Best for: Lang/Lit · History · Psychology · TOK</span>
+        <span class="pill">Skill focus: structure → clarity → coherence</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- LEFT: CONTROLS -->
+    <section class="panel">
+      <div class="panelHeader">
+        <h2>Controls</h2>
+      </div>
+      <div class="panelBody">
+        <div class="tabs" role="tablist" aria-label="Modules">
+          <div class="tab active" data-tab="xray" role="tab" aria-selected="true">Essay X-Ray</div>
+          <div class="tab" data-tab="puzzle" role="tab" aria-selected="false">Paragraph Puzzle</div>
+        </div>
+
+        <div id="xrayControls" style="margin-top:12px;">
+          <div class="row">
+            <label>Exemplar
+              <select id="exemplarSelect"></select>
+            </label>
+            <label>Mode
+              <select id="xrayMode">
+                <option value="label">Label sentences (click)</option>
+                <option value="erase">Erase labels</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="legend" aria-label="Label legend">
+            <span class="tag"><span class="dot" style="background: rgba(124,58,237,0.95)"></span> Thesis</span>
+            <span class="tag"><span class="dot" style="background: rgba(34,197,94,0.95)"></span> Topic sentence</span>
+            <span class="tag"><span class="dot" style="background: rgba(59,130,246,0.95)"></span> Evidence / development</span>
+            <span class="tag"><span class="dot" style="background: rgba(251,191,36,0.95)"></span> Conclusion / synthesis</span>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="primary" id="btnThesis">Set label: Thesis</button>
+            <button class="good" id="btnTopic">Set label: Topic</button>
+            <button id="btnEvid">Set label: Evidence</button>
+            <button class="warn" id="btnConc">Set label: Conclusion</button>
+            <button class="bad" id="btnClear">Clear all</button>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="primary" id="btnReveal">Reveal model</button>
+            <button id="btnHide">Hide model</button>
+            <button id="btnScore">Score my labels</button>
+          </div>
+
+          <div class="callout">
+            <strong>How to use:</strong> Choose a label, then click sentences. Try to find the thesis, the topic sentence(s), and the conclusion.
+            Then reveal the model and compare. This trains recognition at the sentence/paragraph level.
+            <div class="small" style="margin-top:8px;">
+              Teacher move: start with “Cats vs Dogs” or “Pineapple on pizza” to build confidence, then move to speeches/literature.
+            </div>
+          </div>
+        </div>
+
+        <div id="puzzleControls" style="margin-top:12px; display:none;">
+          <div class="row">
+            <label>Puzzle
+              <select id="puzzleSelect"></select>
+            </label>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="primary" id="btnCheckPuzzle">Check order</button>
+            <button id="btnResetPuzzle">Reset puzzle</button>
+          </div>
+
+          <div class="callout">
+            <strong>Goal:</strong> rebuild a coherent paragraph. Put the topic sentence first, then development/evidence, and end with a mini-conclusion.
+            This trains logical progression and coherence.
+            <div class="small" style="margin-top:8px;">Tip: if it feels like two topics, it probably is. One paragraph = one idea.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: WORK AREA -->
+    <section class="panel">
+      <div class="panelHeader">
+        <h2>Practice</h2>
+      </div>
+
+      <!-- XRAY -->
+      <div id="xrayArea" class="workArea">
+        <div class="row" style="justify-content:space-between;">
+          <div class="statusPill" id="statusPill">Selected label: <span class="kbd" id="labelName">Thesis</span></div>
+          <div class="row" style="gap:8px;">
+            <span class="badge" id="typeBadge">📘 Text type</span>
+            <div class="statusPill" id="modelPill">Model: <span class="kbd" id="modelStatus">hidden</span></div>
+          </div>
+        </div>
+
+        <div class="small" id="contextLine" style="margin-top:10px;"></div>
+        <div style="margin-top:10px;" class="textBox" id="textBox" aria-label="Exemplar text"></div>
+
+        <div class="panelBody" style="padding:12px 12px 0;">
+          <div class="scoreGrid">
+            <div class="card">
+              <h3>Overall similarity</h3>
+              <div class="metric"><span>Match</span><span id="overallPct">—</span></div>
+              <div class="bar"><div class="fill" id="overallBar"></div></div>
+              <div class="small" style="margin-top:8px; color:rgba(233,236,255,0.78);">
+                This compares your labels to the model labels sentence-by-sentence.
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Breakdown by feature</h3>
+              <div class="metric"><span>Thesis</span><span id="thesisPct">—</span></div>
+              <div class="bar"><div class="fill" id="thesisBar"></div></div>
+
+              <div class="metric" style="margin-top:8px;"><span>Topic sentence</span><span id="topicPct">—</span></div>
+              <div class="bar"><div class="fill" id="topicBar"></div></div>
+
+              <div class="metric" style="margin-top:8px;"><span>Conclusion</span><span id="concPct">—</span></div>
+              <div class="bar"><div class="fill" id="concBar"></div></div>
+            </div>
+          </div>
+
+          <div class="callout" id="feedbackBox" style="margin-top:10px;">
+            <strong>Feedback will appear here.</strong> Try labeling first, then click “Score my labels”.
+          </div>
+        </div>
+      </div>
+
+      <!-- PUZZLE -->
+      <div id="puzzleArea" class="workArea" style="display:none;">
+        <div class="puzzleWrap">
+          <div>
+            <div class="statusPill" style="margin-bottom:10px;">Drop zone (build your paragraph)</div>
+            <div id="slots"></div>
+          </div>
+          <div>
+            <div class="statusPill" style="margin-bottom:10px;">Sentence bank (drag from here)</div>
+            <div id="bank"></div>
+          </div>
+        </div>
+
+        <div class="panelBody" style="padding:12px 12px 0;">
+          <div class="callout" id="puzzleFeedback">
+            <strong>Feedback will appear here.</strong> Drag sentences into the slots, then “Check order”.
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+<script>
+  // ==============================
+  // Data (fixed exemplars + deterministic model labels)
+  // ==============================
+  // Labels: thesis | topic | evid | conc | none
+  // Notes on sources: Many are paraphrased and/or original micro-exemplars, to keep this GitHub Pages project safe and self-contained.
+
+  const EXEMPLARS = [
+    // --- Very low-level / confidence builders ---
+    {
+      id: "fun-cats-dogs",
+      title: "Starter: Cats vs Dogs (confidence builder)",
+      type: "fun",
+      context: "Low-stakes argument practice: identify claim → support → wrap-up.",
+      sentences: [
+        "Dogs make better pets for most people because they are easier to train and more socially responsive.",
+        "They often enjoy routines, which makes them a good match for busy households.",
+        "Dogs also provide clear feedback through body language, helping owners meet their needs.",
+        "Although cats can be independent and low-maintenance, that independence can feel distant to some owners.",
+        "Overall, dogs are often the better choice when a household wants companionship, structure, and interaction."
+      ],
+      model: ["thesis","evid","evid","evid","conc"]
+    },
+    {
+      id: "fun-pineapple-pizza",
+      title: "Starter: Pineapple on Pizza (confidence builder)",
+      type: "fun",
+      context: "Practice building a clear position and acknowledging counterclaims.",
+      sentences: [
+        "Pineapple can belong on pizza because sweet and salty flavours can complement each other.",
+        "Many cuisines use fruit with savoury dishes, so the pairing is not inherently ‘wrong.’",
+        "Critics argue the sweetness distracts from traditional pizza flavours and texture.",
+        "However, taste is culturally shaped, and ‘traditional’ is not a universal standard.",
+        "Therefore, pineapple on pizza is valid when it is treated as a deliberate flavour choice rather than a mistake."
+      ],
+      model: ["thesis","evid","evid","evid","conc"]
+    },
+    {
+      id: "fun-school-uniforms",
+      title: "Starter: Should schools require uniforms?",
+      type: "fun",
+      context: "Everyday policy argument; good bridge to IB-style writing.",
+      sentences: [
+        "Schools should require uniforms because they reduce distraction and help students focus on learning.",
+        "Uniforms can also reduce visible economic differences, which may lower social pressure.",
+        "Opponents claim uniforms limit self-expression, which matters for identity development.",
+        "Yet schools can allow expression through clubs, projects, and choice of accessories within reasonable limits.",
+        "In short, uniforms are justified when the goal is a calmer learning environment, not control for its own sake."
+      ],
+      model: ["thesis","evid","evid","evid","conc"]
+    },
+
+    // --- Original academic micro-exemplars ---
+    {
+      id: "mini-essay-1",
+      title: "Mini-Exemplar: The purpose of essay writing",
+      type: "academic",
+      context: "General academic writing (cross-subject: TOK / Lang & Lit / History).",
+      sentences: [
+        "Essay writing is not only a way to show what you know; it is a method for building clearer thinking.",
+        "A strong essay begins with a thesis that answers the question and sets a direction for the reader.",
+        "Each body paragraph should then open with a topic sentence that states one idea supporting that thesis.",
+        "After the topic sentence, the writer develops the idea through explanation, evidence, and analysis that stay focused on the paragraph’s claim.",
+        "Finally, the conclusion should do more than repeat: it should synthesise the argument and show why it matters.",
+        "When these parts work together, the essay becomes a coherent argument rather than a list of facts."
+      ],
+      model: ["thesis","topic","evid","evid","conc","conc"]
+    },
+    {
+      id: "mini-essay-2",
+      title: "Mini-Exemplar: A paragraph’s single idea",
+      type: "academic",
+      context: "Argument structure (useful for Psychology ERQs, History essays, Lang/Lit).",
+      sentences: [
+        "A paragraph is strongest when it develops one idea rather than several at once.",
+        "If the reader has to guess what the paragraph is ‘about,’ the writer has not controlled the argument.",
+        "For example, a paragraph that shifts from a claim to an unrelated example loses coherence, even if both points are interesting.",
+        "Keeping the paragraph focused allows the evidence to feel purposeful because it clearly supports the topic sentence.",
+        "Therefore, writers should check that every sentence either states the claim, explains it, or proves it.",
+        "This discipline makes the overall essay easier to follow and harder to refute."
+      ],
+      model: ["topic","evid","evid","evid","conc","conc"]
+    },
+
+    // --- Speeches & literature: short paraphrased exemplars ---
+    {
+      id: "speech-mlk-equality",
+      title: "MLK – Equality and the unfulfilled promise (speech, paraphrased)",
+      type: "speech",
+      context: "Non-literary text; rhetoric and persuasion (IB Lang & Lit Paper 1).",
+      sentences: [
+        "A nation’s promise of equality cannot be treated as complete while many citizens still experience injustice.",
+        "This failure matters because people are judged by identity markers instead of character and merit.",
+        "Segregation and discrimination restrict opportunity and weaken democratic ideals.",
+        "These harms are visible in unequal education, employment, and justice.",
+        "For these reasons, equality cannot remain an ideal; it must become a lived reality."
+      ],
+      model: ["thesis","evid","evid","evid","conc"]
+    },
+    {
+      id: "essay-orwell-language",
+      title: "Orwell – Unclear language enables unclear thinking (essay, paraphrased)",
+      type: "essay",
+      context: "Non-fiction argument; style as a tool for thinking.",
+      sentences: [
+        "Vague language enables vague thinking, and vague thinking allows poor decisions to escape scrutiny.",
+        "When writers rely on worn-out phrases, they avoid confronting what they truly mean.",
+        "This habit makes it easier for political language to hide responsibility rather than reveal it.",
+        "Therefore, improving language is not cosmetic; it is an intellectual necessity."
+      ],
+      model: ["thesis","evid","evid","conc"]
+    },
+    {
+      id: "novel-atwood-control",
+      title: "Atwood – Control of bodies as political power (novel, paraphrased)",
+      type: "novel",
+      context: "Literary text; theme and authorial message (Lang/Lit).",
+      sentences: [
+        "Atwood presents control over women’s bodies as a method of maintaining political power.",
+        "By reducing women to reproductive functions, the state removes autonomy and identity.",
+        "The system is enforced through fear, ritual, and surveillance as much as through overt violence.",
+        "Through this portrayal, Atwood warns that authoritarianism often advances through normalised cruelty."
+      ],
+      model: ["topic","evid","evid","conc"]
+    },
+    {
+      id: "speech-adichie-single-story",
+      title: "Adichie – The danger of a single story (speech, paraphrased)",
+      type: "speech",
+      context: "Perspective and representation (TOK / Lang & Lit).",
+      sentences: [
+        "When we hear only one story about a person or place, we risk misunderstanding it completely.",
+        "Single stories flatten complexity and replace human variety with stereotypes.",
+        "These stereotypes gain power when they are repeated by institutions with cultural authority.",
+        "Recognising multiple perspectives is therefore essential to intellectual honesty."
+      ],
+      model: ["thesis","evid","evid","conc"]
+    },
+    {
+      id: "speech-douglass-hypocrisy",
+      title: "Douglass – Freedom celebrated amid injustice (speech, paraphrased)",
+      type: "speech",
+      context: "Moral argument; rhetorical critique (History / Lang & Lit).",
+      sentences: [
+        "Celebrations of freedom become hollow when a society denies freedom to millions.",
+        "The contradiction between liberty and oppression exposes deep moral hypocrisy.",
+        "That hypocrisy grows when national pride is used to silence criticism.",
+        "The argument forces listeners to confront the cost of ignoring injustice."
+      ],
+      model: ["thesis","evid","evid","conc"]
+    },
+    {
+      id: "essay-woolf-independence",
+      title: "Woolf – Material independence enables creativity (essay, paraphrased)",
+      type: "essay",
+      context: "Reasoning and structure; inequality as a structural problem.",
+      sentences: [
+        "Creative freedom depends not only on talent but on material independence.",
+        "Without financial security and personal space, sustained intellectual work becomes difficult.",
+        "Historically, women were denied both money and privacy, limiting their artistic output.",
+        "Woolf reframes inequality as structural rather than an individual failure."
+      ],
+      model: ["thesis","evid","evid","conc"]
+    },
+    {
+      id: "speech-obama-participation",
+      title: "Obama – Participation makes change possible (speech, paraphrased)",
+      type: "speech",
+      context: "Political rhetoric; collective action and civic responsibility.",
+      sentences: [
+        "Political change occurs when citizens believe their participation matters.",
+        "Throughout history, progress has depended on ordinary people acting collectively.",
+        "This moment suggests democratic engagement can overcome cynicism.",
+        "The message positions hope as an active responsibility, not passive optimism."
+      ],
+      model: ["thesis","evid","evid","conc"]
+    },
+    {
+      id: "philosophy-camus-absurd",
+      title: "Camus – Meaning through struggle (philosophy, paraphrased)",
+      type: "philosophy",
+      context: "Existential reasoning; useful for TOK essay thinking.",
+      sentences: [
+        "Humans continue searching for meaning even in a universe that offers no clear answers.",
+        "We act despite recognising the absurdity of existence.",
+        "This persistence transforms resignation into rebellion.",
+        "Camus concludes that embracing struggle can itself become a form of meaning."
+      ],
+      model: ["thesis","evid","evid","conc"]
+    }
+  ];
+
+  const PUZZLES = [
+    {
+      id: "puzzle-1",
+      title: "Puzzle 1: Social media and concentration (claim → development → mini-conclusion)",
+      ordered: [
+        { role: "topic", text: "Social media can reduce students’ concentration by fragmenting attention into short, frequent interruptions." },
+        { role: "evid",  text: "Notifications train the brain to expect novelty, making sustained focus feel unusually difficult." },
+        { role: "evid",  text: "As a result, students may start tasks often but switch away before reaching deeper understanding." },
+        { role: "evid",  text: "This matters in IB subjects because extended reasoning is required for complex problems and structured essays." },
+        { role: "conc",  text: "Therefore, managing digital distractions is not just a lifestyle choice; it directly supports academic performance." }
+      ]
+    },
+    {
+      id: "puzzle-2",
+      title: "Puzzle 2: Cats vs Dogs (easy mode)",
+      ordered: [
+        { role: "topic", text: "Dogs are often better pets for people who want daily companionship." },
+        { role: "evid",  text: "They usually enjoy routines like walks and play, which creates regular interaction." },
+        { role: "evid",  text: "This routine can reduce loneliness and help owners build habits." },
+        { role: "evid",  text: "Cats can be affectionate too, but their independence may feel less predictable to some owners." },
+        { role: "conc",  text: "Overall, dogs suit households seeking consistent social connection." }
+      ]
+    },
+    {
+      id: "puzzle-3",
+      title: "Puzzle 3: Thesis statements (what makes one strong?)",
+      ordered: [
+        { role: "topic", text: "A strong thesis statement must answer the question and take a defensible position." },
+        { role: "evid",  text: "If it is purely descriptive, the essay becomes a list rather than an argument." },
+        { role: "evid",  text: "If it is too broad, the essay loses control because it cannot prove everything it claims." },
+        { role: "evid",  text: "A precise thesis also helps topic sentences stay aligned to one clear line of reasoning." },
+        { role: "conc",  text: "Therefore, improving the thesis is often the fastest way to improve the whole essay." }
+      ]
+    },
+    {
+      id: "puzzle-4",
+      title: "Puzzle 4: Pineapple on pizza (acknowledging counterclaims)",
+      ordered: [
+        { role: "topic", text: "Pineapple on pizza can work when the sweetness is balanced by salty and savoury flavours." },
+        { role: "evid",  text: "Many cuisines mix fruit with meat or spice, so the pairing is not unusual in principle." },
+        { role: "evid",  text: "Critics argue it distracts from traditional pizza flavours and texture." },
+        { role: "evid",  text: "However, ‘traditional’ depends on culture, and taste is shaped by experience." },
+        { role: "conc",  text: "So the issue is not whether pineapple is allowed, but whether the flavour choice is intentional." }
+      ]
+    }
+  ];
+
+  // ==============================
+  // UI State
+  // ==============================
+  const state = {
+    tab: "xray",
+    exemplarId: EXEMPLARS[0].id,
+    selectedLabel: "thesis",
+    modelVisible: false,
+    studentLabels: [],
+
+    puzzleId: PUZZLES[0].id,
+    puzzleSlots: []
+  };
+
+  // ==============================
+  // Elements
+  // ==============================
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  const el = {
+    tabs: $$(".tab"),
+    xrayControls: $("#xrayControls"),
+    puzzleControls: $("#puzzleControls"),
+    xrayArea: $("#xrayArea"),
+    puzzleArea: $("#puzzleArea"),
+
+    exemplarSelect: $("#exemplarSelect"),
+    xrayMode: $("#xrayMode"),
+
+    btnThesis: $("#btnThesis"),
+    btnTopic: $("#btnTopic"),
+    btnEvid: $("#btnEvid"),
+    btnConc: $("#btnConc"),
+    btnClear: $("#btnClear"),
+    btnReveal: $("#btnReveal"),
+    btnHide: $("#btnHide"),
+    btnScore: $("#btnScore"),
+
+    labelName: $("#labelName"),
+    modelStatus: $("#modelStatus"),
+
+    textBox: $("#textBox"),
+    contextLine: $("#contextLine"),
+    typeBadge: $("#typeBadge"),
+
+    overallPct: $("#overallPct"),
+    overallBar: $("#overallBar"),
+    thesisPct: $("#thesisPct"),
+    thesisBar: $("#thesisBar"),
+    topicPct: $("#topicPct"),
+    topicBar: $("#topicBar"),
+    concPct: $("#concPct"),
+    concBar: $("#concBar"),
+    feedbackBox: $("#feedbackBox"),
+
+    puzzleSelect: $("#puzzleSelect"),
+    btnCheckPuzzle: $("#btnCheckPuzzle"),
+    btnResetPuzzle: $("#btnResetPuzzle"),
+    slots: $("#slots"),
+    bank: $("#bank"),
+    puzzleFeedback: $("#puzzleFeedback")
+  };
+
+  // ==============================
+  // Utils
+  // ==============================
+  function labelToStudentClass(label){
+    if (label === "thesis") return "s-thesis";
+    if (label === "topic") return "s-topic";
+    if (label === "evid") return "s-evid";
+    if (label === "conc") return "s-conc";
+    return "";
+  }
+  function labelToModelClass(label){
+    if (label === "thesis") return "m-thesis";
+    if (label === "topic") return "m-topic";
+    if (label === "evid") return "m-evid";
+    if (label === "conc") return "m-conc";
+    return "";
+  }
+
+  function pct(n, d){
+    if (d === 0) return 0;
+    return Math.round((n/d)*100);
+  }
+
+  function setBar(barEl, percent){
+    barEl.style.width = percent + "%";
+    const good = "rgba(34,197,94,0.55)";
+    const warn = "rgba(251,191,36,0.55)";
+    const bad  = "rgba(251,113,133,0.55)";
+    barEl.style.background = percent >= 75 ? good : (percent >= 45 ? warn : bad);
+  }
+
+  function getExemplar(){
+    return EXEMPLARS.find(e => e.id === state.exemplarId) || EXEMPLARS[0];
+  }
+
+  function getPuzzle(){
+    return PUZZLES.find(p => p.id === state.puzzleId) || PUZZLES[0];
+  }
+
+  function typeBadgeText(type){
+    if (type === "speech") return "🗣 Speech";
+    if (type === "essay") return "📘 Essay";
+    if (type === "novel") return "📕 Novel";
+    if (type === "philosophy") return "🧠 Philosophy";
+    if (type === "academic") return "🧩 Academic skill";
+    if (type === "fun") return "🎈 Starter";
+    return "📄 Text";
+  }
+
+  function resetMetrics(){
+    el.overallPct.textContent = "—";
+    el.thesisPct.textContent = "—";
+    el.topicPct.textContent = "—";
+    el.concPct.textContent = "—";
+    setBar(el.overallBar, 0);
+    setBar(el.thesisBar, 0);
+    setBar(el.topicBar, 0);
+    setBar(el.concBar, 0);
+  }
+
+  // ==============================
+  // Tabs
+  // ==============================
+  function setTab(tab){
+    state.tab = tab;
+    el.tabs.forEach(t => {
+      const active = t.dataset.tab === tab;
+      t.classList.toggle("active", active);
+      t.setAttribute("aria-selected", active ? "true" : "false");
+    });
+
+    const isX = tab === "xray";
+    el.xrayControls.style.display = isX ? "block" : "none";
+    el.puzzleControls.style.display = isX ? "none" : "block";
+    el.xrayArea.style.display = isX ? "block" : "none";
+    el.puzzleArea.style.display = isX ? "none" : "block";
+
+    if (isX) renderXray();
+    else renderPuzzle();
+  }
+
+  el.tabs.forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
+
+  // ==============================
+  // X-Ray
+  // ==============================
+  function resetStudentLabels(){
+    const ex = getExemplar();
+    state.studentLabels = ex.sentences.map(()=>"none");
+  }
+
+  function setSelectedLabel(label){
+    state.selectedLabel = label;
+    el.labelName.textContent = label;
+  }
+
+  function setModelVisible(v){
+    state.modelVisible = v;
+    el.modelStatus.textContent = v ? "visible" : "hidden";
+    renderXray();
+  }
+
+  function renderXray(){
+    const ex = getExemplar();
+
+    if (!state.studentLabels.length || state.studentLabels.length !== ex.sentences.length) {
+      resetStudentLabels();
+    }
+
+    el.typeBadge.textContent = typeBadgeText(ex.type);
+    el.contextLine.textContent = ex.context;
+
+    el.textBox.innerHTML = "";
+    ex.sentences.forEach((s, idx) => {
+      const span = document.createElement("span");
+      span.className = "sentence";
+      span.dataset.idx = String(idx);
+      span.textContent = s + (idx === ex.sentences.length-1 ? "" : " ");
+
+      const sl = state.studentLabels[idx];
+      const sc = labelToStudentClass(sl);
+      if (sc) span.classList.add(sc);
+
+      if (state.modelVisible) {
+        const ml = ex.model[idx];
+        const mc = labelToModelClass(ml);
+        if (mc) span.classList.add(mc);
+      }
+
+      span.addEventListener("click", () => {
+        const mode = el.xrayMode.value;
+        if (mode === "erase") state.studentLabels[idx] = "none";
+        else state.studentLabels[idx] = state.selectedLabel;
+        renderXray();
+      });
+
+      el.textBox.appendChild(span);
+    });
+
+    el.labelName.textContent = state.selectedLabel;
+    if (el.overallPct.textContent === "—") {
+      el.feedbackBox.innerHTML = "<strong>Feedback will appear here.</strong> Label sentences, then click “Score my labels”.";
+    }
+  }
+
+  function scoreXray(){
+    const ex = getExemplar();
+    const student = state.studentLabels;
+
+    let matches = 0;
+    for (let i=0;i<ex.model.length;i++) {
+      if (student[i] === ex.model[i]) matches++;
+    }
+
+    const overall = pct(matches, ex.model.length);
+    el.overallPct.textContent = overall + "%";
+    setBar(el.overallBar, overall);
+
+    function featureScore(feature){
+      const modelIdx = ex.model.map((l,i)=> l===feature ? i : -1).filter(i=>i!==-1);
+      const studIdx  = student.map((l,i)=> l===feature ? i : -1).filter(i=>i!==-1);
+      let tp = 0;
+      for (const i of studIdx) if (modelIdx.includes(i)) tp++;
+      const recall = pct(tp, modelIdx.length || 1);
+      return { recall, modelCount: modelIdx.length, studCount: studIdx.length, tp };
+    }
+
+    const t = featureScore("thesis");
+    const k = featureScore("topic");
+    const c = featureScore("conc");
+
+    el.thesisPct.textContent = t.recall + "%";
+    setBar(el.thesisBar, t.recall);
+    el.topicPct.textContent = k.recall + "%";
+    setBar(el.topicBar, k.recall);
+    el.concPct.textContent = c.recall + "%";
+    setBar(el.concBar, c.recall);
+
+    const tips = [];
+
+    // Category guidance
+    tips.push("Quick definitions: <strong>Thesis</strong> = the controlling answer/position. <strong>Topic sentence</strong> = the paragraph’s single claim. <strong>Evidence/development</strong> = explanation, examples, analysis. <strong>Conclusion</strong> = synthesis/‘so what’. ");
+
+    // Thesis feedback
+    if (t.modelCount === 0) {
+      tips.push("Thesis: this exemplar does not include a separate thesis sentence in the model.");
+    } else if (t.tp === 0) {
+      tips.push("Thesis: you did not match the model thesis. Look for the sentence that takes a position and controls what follows.");
+    } else if (t.recall < 100) {
+      tips.push("Thesis: you found part of it. Check whether your thesis choice is too descriptive or too broad.");
+    } else {
+      tips.push("Thesis: strong identification.");
+    }
+
+    // Topic feedback
+    if (k.modelCount === 0) {
+      tips.push("Topic sentence: this exemplar does not mark a distinct topic sentence.");
+    } else if (k.tp === 0) {
+      tips.push("Topic sentence: look for a sentence that states one idea clearly. Evidence sentences usually explain or give examples.");
+    } else if (k.recall < 100) {
+      tips.push("Topic sentence: close. Check whether you confused a definition/transition with the actual claim.");
+    } else {
+      tips.push("Topic sentence: strong identification.");
+    }
+
+    // Conclusion feedback
+    if (c.modelCount === 0) {
+      tips.push("Conclusion: this exemplar does not include a separate conclusion label.");
+    } else if (c.tp === 0) {
+      tips.push("Conclusion: look for synthesis—what does the reasoning add up to? Often it signals ‘therefore’ or explains why it matters.");
+    } else if (c.recall < 100) {
+      tips.push("Conclusion: you got one. Consider whether the final sentence is doing the ‘so what?’ work.");
+    } else {
+      tips.push("Conclusion: strong identification.");
+    }
+
+    // Low-level confidence booster
+    if (ex.type === "fun") {
+      tips.push("Level-up challenge: rewrite the thesis so it is <em>more specific</em> (add ‘because…’ and name your criteria). ");
+    }
+
+    el.feedbackBox.innerHTML = "<strong>Actionable feedback:</strong><ul style=\"margin:8px 0 0 18px; padding:0;\">" +
+      tips.map(t=>"<li>"+t+"</li>").join("") +
+      "</ul>";
+  }
+
+  // Label selection
+  el.btnThesis.addEventListener("click", () => setSelectedLabel("thesis"));
+  el.btnTopic.addEventListener("click", () => setSelectedLabel("topic"));
+  el.btnEvid.addEventListener("click", () => setSelectedLabel("evid"));
+  el.btnConc.addEventListener("click", () => setSelectedLabel("conc"));
+
+  el.btnClear.addEventListener("click", () => {
+    resetStudentLabels();
+    resetMetrics();
+    el.feedbackBox.innerHTML = "<strong>Cleared.</strong> Label again, then score.";
+    renderXray();
+  });
+
+  el.btnReveal.addEventListener("click", () => setModelVisible(true));
+  el.btnHide.addEventListener("click", () => setModelVisible(false));
+  el.btnScore.addEventListener("click", scoreXray);
+
+  el.exemplarSelect.addEventListener("change", () => {
+    state.exemplarId = el.exemplarSelect.value;
+    state.modelVisible = false;
+    resetStudentLabels();
+    resetMetrics();
+    el.feedbackBox.innerHTML = "<strong>New exemplar loaded.</strong> Label sentences, then score.";
+    renderXray();
+  });
+
+  // ==============================
+  // Paragraph Puzzle
+  // ==============================
+  function shuffle(arr){
+    const a = arr.slice();
+    for (let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function initPuzzle(){
+    const p = getPuzzle();
+    state.puzzleSlots = Array.from({length: p.ordered.length}, () => null);
+  }
+
+  function renderPuzzle(){
+    const p = getPuzzle();
+    if (!state.puzzleSlots.length || state.puzzleSlots.length !== p.ordered.length) {
+      initPuzzle();
+    }
+
+    if (!p._bankOrder) {
+      p._bankOrder = shuffle(p.ordered.map((_,i)=>i));
+    }
+
+    el.slots.innerHTML = "";
+    for (let i=0;i<p.ordered.length;i++){
+      const slot = document.createElement("div");
+      slot.className = "slot";
+      slot.dataset.slot = String(i);
+      slot.ondragover = (e)=>{ e.preventDefault(); slot.style.background = "rgba(124,58,237,0.15)"; };
+      slot.ondragleave = ()=>{ slot.style.background = "rgba(255,255,255,0.03)"; };
+      slot.ondrop = (e)=>{
+        e.preventDefault();
+        slot.style.background = "rgba(255,255,255,0.03)";
+        const bankIdx = parseInt(e.dataTransfer.getData("text/plain"),10);
+        const existing = state.puzzleSlots.findIndex(x=>x===bankIdx);
+        if (existing !== -1) state.puzzleSlots[existing] = null;
+        state.puzzleSlots[i] = bankIdx;
+        renderPuzzle();
+      };
+
+      const label = document.createElement("div");
+      label.className = "slotLabel";
+      label.textContent = `Slot ${i+1}`;
+
+      const text = document.createElement("div");
+      text.className = "slotText";
+
+      const placed = state.puzzleSlots[i];
+      if (placed === null) {
+        text.innerHTML = "<span style='color:rgba(233,236,255,0.55)'>Drop a sentence here</span>";
+      } else {
+        text.textContent = p.ordered[placed].text;
+      }
+
+      const btn = document.createElement("button");
+      btn.textContent = "Clear";
+      btn.onclick = ()=>{ state.puzzleSlots[i] = null; renderPuzzle(); };
+
+      slot.appendChild(label);
+      slot.appendChild(text);
+      slot.appendChild(btn);
+      el.slots.appendChild(slot);
+    }
+
+    el.bank.innerHTML = "";
+    for (const bankIdx of p._bankOrder) {
+      if (state.puzzleSlots.includes(bankIdx)) continue;
+      const item = document.createElement("div");
+      item.className = "bankItem";
+      item.draggable = true;
+      item.dataset.bank = String(bankIdx);
+      item.textContent = p.ordered[bankIdx].text;
+      item.ondragstart = (e)=>{
+        e.dataTransfer.setData("text/plain", String(bankIdx));
+      };
+      el.bank.appendChild(item);
+    }
+
+    el.puzzleFeedback.innerHTML = "<strong>Feedback will appear here.</strong> Drag sentences into the slots, then “Check order”.";
+  }
+
+  function checkPuzzle(){
+    const p = getPuzzle();
+    const placed = state.puzzleSlots;
+
+    if (placed.some(x=>x===null)) {
+      el.puzzleFeedback.innerHTML = "<strong>Not finished.</strong> Fill every slot before checking.";
+      return;
+    }
+
+    let correct = 0;
+    const notes = [];
+
+    for (let i=0;i<p.ordered.length;i++){
+      if (placed[i] === i) correct++;
+      else {
+        const expectedRole = p.ordered[i].role;
+        const gotRole = p.ordered[placed[i]].role;
+        if (i === 0 && gotRole !== "topic") {
+          notes.push("Slot 1 is usually the topic sentence: your first sentence should state the paragraph’s single claim.");
+        }
+        if (i === p.ordered.length-1 && gotRole !== "conc") {
+          notes.push("The last slot should function as a mini-conclusion (synthesis / ‘so what’), not new evidence.");
+        }
+        if (expectedRole === "evid" && gotRole === "topic") {
+          notes.push("A topic sentence placed mid-paragraph can feel like a second paragraph starting. Topic sentences typically lead.");
+        }
+      }
+    }
+
+    const score = pct(correct, p.ordered.length);
+
+    const msg = score === 100
+      ? "<strong>Perfect order.</strong> This reads like a controlled paragraph: claim → development → mini-conclusion."
+      : `<strong>Order match:</strong> ${score}% (${correct}/${p.ordered.length} correct positions).`;
+
+    const extra = notes.length
+      ? "<ul style='margin:8px 0 0 18px; padding:0;'>" + notes.map(n=>"<li>"+n+"</li>").join("") + "</ul>"
+      : "<div style='margin-top:8px; color:rgba(233,236,255,0.8); font-size:12px;'>Tip: read it aloud. If the claim is unclear early, move the topic sentence up.</div>";
+
+    el.puzzleFeedback.innerHTML = msg + extra;
+  }
+
+  el.btnCheckPuzzle.addEventListener("click", checkPuzzle);
+  el.btnResetPuzzle.addEventListener("click", () => {
+    const p = getPuzzle();
+    p._bankOrder = shuffle(p.ordered.map((_,i)=>i));
+    initPuzzle();
+    renderPuzzle();
+  });
+
+  el.puzzleSelect.addEventListener("change", () => {
+    state.puzzleId = el.puzzleSelect.value;
+    const p = getPuzzle();
+    p._bankOrder = null;
+    initPuzzle();
+    renderPuzzle();
+  });
+
+  // ==============================
+  // Init UI
+  // ==============================
+  function init(){
+    // Exemplar select
+    el.exemplarSelect.innerHTML = "";
+    for (const ex of EXEMPLARS) {
+      const opt = document.createElement("option");
+      opt.value = ex.id;
+      opt.textContent = ex.title;
+      el.exemplarSelect.appendChild(opt);
+    }
+    el.exemplarSelect.value = state.exemplarId;
+
+    // Puzzle select
+    el.puzzleSelect.innerHTML = "";
+    for (const p of PUZZLES) {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.title;
+      el.puzzleSelect.appendChild(opt);
+    }
+    el.puzzleSelect.value = state.puzzleId;
+
+    resetStudentLabels();
+    setSelectedLabel("thesis");
+    setModelVisible(false);
+    resetMetrics();
+
+    setTab("xray");
+  }
+
+  init();
+</script>
+</body>
+</html>
