@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IB Chemistry: Interactive Periodic Table + Molecule Builder</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:rgba(255,255,255,0.05);
+      --panel2:rgba(255,255,255,0.03);
+      --ink:#e9ecff;
+      --muted:rgba(233,236,255,0.72);
+      --border:rgba(255,255,255,0.12);
+      --good:rgba(34,197,94,0.55);
+      --warn:rgba(251,191,36,0.55);
+      --bad:rgba(251,113,133,0.55);
+      --accent:rgba(124,58,237,0.55);
+      --blue:rgba(59,130,246,0.55);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1100px 700px at 15% 10%, rgba(124,58,237,0.35), transparent 60%),
+        radial-gradient(1100px 700px at 85% 12%, rgba(59,130,246,0.25), transparent 58%),
+        linear-gradient(180deg, #070a14, var(--bg));
+    }
+    a{color:#9ac6ff;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    header{max-width:1300px;margin:0 auto;padding:18px 16px 8px}
+    .topnav{margin-bottom:10px}
+    h1{margin:0;font-size:20px;letter-spacing:0.2px}
+    .sub{margin:8px 0 0;color:var(--muted);line-height:1.4;font-size:13px;max-width:1050px}
+
+    main{max-width:1300px;margin:0 auto;padding:10px 16px 24px;display:grid;grid-template-columns: 1.05fr 0.95fr;gap:12px;align-items:start}
+    @media (max-width:1100px){main{grid-template-columns:1fr}}
+
+    .panel{border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,var(--panel),var(--panel2));box-shadow:0 10px 35px rgba(0,0,0,0.25);overflow:hidden}
+    .panelHeader{padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+    .panelHeader h2{margin:0;font-size:13px;letter-spacing:0.2px}
+    .panelBody{padding:12px}
+
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .pill{font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:rgba(233,236,255,0.9)}
+    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; padding:2px 6px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.05);font-size:12px}
+
+    input[type="text"], select{
+      background:rgba(0,0,0,0.22);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:8px 10px;
+      color:var(--ink);
+      outline:none;
+      font-size:12px;
+    }
+    button{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.04);
+      color:var(--ink);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:12px;
+      cursor:pointer;
+    }
+    button.primary{background:rgba(124,58,237,0.25);border-color:rgba(124,58,237,0.55)}
+    button.good{background:rgba(34,197,94,0.18);border-color:rgba(34,197,94,0.55)}
+    button.warn{background:rgba(251,191,36,0.16);border-color:rgba(251,191,36,0.55)}
+    button.bad{background:rgba(251,113,133,0.16);border-color:rgba(251,113,133,0.55)}
+    button:hover{filter:brightness(1.07)}
+
+    /* Periodic table */
+    .tableWrap{overflow:auto;padding:12px}
+    .ptable{display:grid;grid-template-columns:repeat(18, minmax(42px, 1fr));gap:6px;min-width: 920px}
+    .el{
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:6px;
+      background:rgba(255,255,255,0.03);
+      cursor:pointer;
+      user-select:none;
+      min-height:52px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      position:relative;
+    }
+    .el:hover{box-shadow:0 0 0 1px rgba(255,255,255,0.2) inset}
+    .el.selected{outline:2px solid rgba(124,58,237,0.85);outline-offset:2px}
+    .el .num{font-size:10px;color:rgba(233,236,255,0.7)}
+    .el .sym{font-size:14px;font-weight:700;letter-spacing:0.3px}
+    .el .name{font-size:10px;color:rgba(233,236,255,0.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* Category tint */
+    .cat-nonmetal{background:rgba(59,130,246,0.12)}
+    .cat-metalloid{background:rgba(251,191,36,0.10)}
+    .cat-metal{background:rgba(34,197,94,0.10)}
+    .cat-noble{background:rgba(124,58,237,0.14)}
+    .cat-halogen{background:rgba(236,72,153,0.10)}
+    .cat-alkali{background:rgba(244,63,94,0.10)}
+    .cat-alkaline{background:rgba(249,115,22,0.10)}
+    .cat-transition{background:rgba(147,197,253,0.08)}
+    .cat-lanth{background:rgba(103,232,249,0.08)}
+    .cat-act{background:rgba(165,180,252,0.08)}
+
+    /* Right column cards */
+    .card{border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,0.03)}
+    .card h3{margin:0 0 8px;font-size:13px}
+    .grid2{display:grid;grid-template-columns: 1fr 1fr;gap:10px}
+    @media (max-width:1100px){.grid2{grid-template-columns:1fr}}
+    .kv{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:rgba(233,236,255,0.86)}
+    .kv span:first-child{color:rgba(233,236,255,0.68)}
+
+    /* Bohr model */
+    .bohr{display:flex;justify-content:center;align-items:center;padding:10px}
+    canvas{max-width:100%}
+
+    /* Builder */
+    .builderWrap{display:grid;grid-template-columns: 1fr;gap:10px}
+    .canvasWrap{border:1px solid var(--border);border-radius:14px;background:rgba(0,0,0,0.18);overflow:hidden}
+    #molCanvas{display:block;width:100%;height:520px}
+    @media (max-width:1100px){#molCanvas{height:460px}}
+
+    .hint{font-size:12px;color:rgba(233,236,255,0.75);line-height:1.4}
+    .status{font-size:12px;color:rgba(233,236,255,0.9)}
+
+    .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 8px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.03)}
+    .dot{width:10px;height:10px;border-radius:999px;display:inline-block}
+
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+
+    .toast{margin-top:10px;padding:10px;border-radius:14px;border:1px solid var(--border);background:rgba(0,0,0,0.2);font-size:12px;line-height:1.45}
+
+    .split{display:grid;grid-template-columns: 1fr 1fr;gap:10px}
+    @media (max-width:1100px){.split{grid-template-columns:1fr}}
+
+    .mini{font-size:11px;color:rgba(233,236,255,0.72)}
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="topnav"><a href="../../index.html">← Back to projects</a></nav>
+    <h1>Interactive Periodic Table + Molecule Builder (IB Chemistry)</h1>
+    <p class="sub">
+      A self-contained, GitHub Pages–friendly tool for IB science students: explore periodic trends, view a simple Bohr model,
+      and build molecules with bonds (single/double/triple) using an IB-level <span class="kbd">Lewis / valence-electron</span> approach.
+      No external libraries, no APIs.
+    </p>
+  </header>
+
+  <main>
+    <!-- LEFT: Periodic table -->
+    <section class="panel">
+      <div class="panelHeader">
+        <h2>Periodic table</h2>
+        <div class="row">
+          <input id="search" type="text" placeholder="Search: symbol, name, atomic # (e.g., O, oxygen, 8)" style="min-width:320px" />
+          <label class="pill">Color by
+            <select id="colorMode">
+              <option value="category" selected>Category</option>
+              <option value="group">Group (1–18)</option>
+              <option value="valence">Valence electrons</option>
+            </select>
+          </label>
+          <button id="btnAddToBuilder" class="primary">Add selected → Builder</button>
+        </div>
+      </div>
+
+      <div class="tableWrap">
+        <div class="legend">
+          <span class="tag"><span class="dot" style="background:rgba(34,197,94,0.55)"></span> Metals</span>
+          <span class="tag"><span class="dot" style="background:rgba(59,130,246,0.55)"></span> Nonmetals</span>
+          <span class="tag"><span class="dot" style="background:rgba(251,191,36,0.55)"></span> Metalloids</span>
+          <span class="tag"><span class="dot" style="background:rgba(124,58,237,0.55)"></span> Noble gases</span>
+          <span class="tag"><span class="dot" style="background:rgba(236,72,153,0.55)"></span> Halogens</span>
+        </div>
+        <div id="ptable" class="ptable" aria-label="Periodic table"></div>
+        <div class="toast" id="searchHelp">
+          <strong>IB tip:</strong> In bonding questions, start with <span class="kbd">valence electrons</span> and the <span class="kbd">octet rule</span>.
+          Then decide whether bonding is <span class="kbd">covalent</span> (nonmetal + nonmetal) or <span class="kbd">ionic</span> (metal + nonmetal).
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Details + Builder -->
+    <section class="panel">
+      <div class="panelHeader">
+        <h2>Element details + molecule builder</h2>
+        <div class="badges">
+          <span class="pill">Mode: <span class="kbd" id="modeLabel">Select</span></span>
+          <span class="pill">Bond: <span class="kbd" id="bondLabel">Single</span></span>
+        </div>
+      </div>
+
+      <div class="panelBody">
+        <div class="split">
+          <div class="card">
+            <h3>Selected element</h3>
+            <div class="kv"><span>Element</span><span id="dName">—</span></div>
+            <div class="kv"><span>Symbol</span><span id="dSym">—</span></div>
+            <div class="kv"><span>Atomic #</span><span id="dZ">—</span></div>
+            <div class="kv"><span>Relative atomic mass</span><span id="dMass">—</span></div>
+            <div class="kv"><span>Group / Period</span><span id="dGP">—</span></div>
+            <div class="kv"><span>Category</span><span id="dCat">—</span></div>
+            <div class="kv"><span>Valence electrons</span><span id="dVal">—</span></div>
+            <div class="kv"><span>Typical valency</span><span id="dValency">—</span></div>
+            <div class="kv"><span>Electronegativity (Pauling)</span><span id="dEN">—</span></div>
+            <div class="toast mini">
+              This tool uses IB-level approximations: valence electrons from main-group position, common valencies, and a simplified Bohr model.
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Bohr model (simplified shells)</h3>
+            <div class="bohr"><canvas id="bohrCanvas" width="280" height="240"></canvas></div>
+            <div class="mini">Shell filling: 2, 8, 18, 32… (simplified for visualization). For IB bonding, focus on outer shell.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px" class="builderWrap">
+          <div class="card">
+            <h3>Molecule builder</h3>
+            <div class="row">
+              <button id="mSelect" class="primary">Select/Move</button>
+              <button id="mBond">Bond tool</button>
+              <button id="mErase" class="bad">Delete</button>
+              <span class="pill">Bond type
+                <select id="bondType">
+                  <option value="1" selected>Single</option>
+                  <option value="2">Double</option>
+                  <option value="3">Triple</option>
+                </select>
+              </span>
+              <button id="mClear" class="bad">Clear molecule</button>
+            </div>
+            <div class="hint" style="margin-top:8px">
+              <strong>How it works:</strong>
+              1) select an element on the periodic table → <span class="kbd">Add selected → Builder</span>;
+              2) drag atoms around;
+              3) choose <span class="kbd">Bond tool</span>, click two atoms to connect;
+              4) use <span class="kbd">Delete</span> to remove atoms/bonds.
+            </div>
+          </div>
+
+          <div class="canvasWrap">
+            <canvas id="molCanvas"></canvas>
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <h3>Computed summary</h3>
+              <div class="kv"><span>Formula</span><span class="mono" id="sumFormula">—</span></div>
+              <div class="kv"><span>Molar mass (g·mol⁻¹)</span><span class="mono" id="sumMass">—</span></div>
+              <div class="kv"><span>Bond count</span><span class="mono" id="sumBonds">—</span></div>
+              <div class="kv"><span>Likely bonding type</span><span id="sumBonding">—</span></div>
+              <div class="toast" id="ibHints">
+                <strong>IB check:</strong> Does each atom have a plausible valency? Are you satisfying the octet rule for C, N, O, F (and duet for H)?
+                If not, try changing bond order (single/double/triple) or the connectivity.
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Octet / valency health (heuristic)</h3>
+              <div class="status" id="health">Build a structure and click bonds. This is a heuristic checker, not a full quantum model.</div>
+              <div class="toast" id="healthDetails" style="margin-top:10px;">—</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+  // ==============================================================
+  // Data (compact, IB-friendly). Full 118 positions + key properties.
+  // This is not a full database; it's designed for IB bonding/trends.
+  // ==============================================================
+
+  // Helpers
+  const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+
+  // Minimal element dataset: position + key IB properties
+  // Fields: Z, sym, name, period, group, category, mass, en, valence, valency, shells
+  // Shells are simplified electron distribution for visualization.
+  const ELEMENTS = [
+    // Period 1
+    {Z:1, sym:"H", name:"Hydrogen", period:1, group:1, category:"nonmetal", mass:1.008, en:2.20, valence:1, valency:"1", shells:[1]},
+    {Z:2, sym:"He", name:"Helium", period:1, group:18, category:"noble", mass:4.0026, en:null, valence:2, valency:"0", shells:[2]},
+    // Period 2
+    {Z:3, sym:"Li", name:"Lithium", period:2, group:1, category:"alkali", mass:6.94, en:0.98, valence:1, valency:"1", shells:[2,1]},
+    {Z:4, sym:"Be", name:"Beryllium", period:2, group:2, category:"alkaline", mass:9.0122, en:1.57, valence:2, valency:"2", shells:[2,2]},
+    {Z:5, sym:"B", name:"Boron", period:2, group:13, category:"metalloid", mass:10.81, en:2.04, valence:3, valency:"3", shells:[2,3]},
+    {Z:6, sym:"C", name:"Carbon", period:2, group:14, category:"nonmetal", mass:12.011, en:2.55, valence:4, valency:"4", shells:[2,4]},
+    {Z:7, sym:"N", name:"Nitrogen", period:2, group:15, category:"nonmetal", mass:14.007, en:3.04, valence:5, valency:"3,5", shells:[2,5]},
+    {Z:8, sym:"O", name:"Oxygen", period:2, group:16, category:"nonmetal", mass:15.999, en:3.44, valence:6, valency:"2", shells:[2,6]},
+    {Z:9, sym:"F", name:"Fluorine", period:2, group:17, category:"halogen", mass:18.998, en:3.98, valence:7, valency:"1", shells:[2,7]},
+    {Z:10, sym:"Ne", name:"Neon", period:2, group:18, category:"noble", mass:20.180, en:null, valence:8, valency:"0", shells:[2,8]},
+    // Period 3
+    {Z:11, sym:"Na", name:"Sodium", period:3, group:1, category:"alkali", mass:22.990, en:0.93, valence:1, valency:"1", shells:[2,8,1]},
+    {Z:12, sym:"Mg", name:"Magnesium", period:3, group:2, category:"alkaline", mass:24.305, en:1.31, valence:2, valency:"2", shells:[2,8,2]},
+    {Z:13, sym:"Al", name:"Aluminium", period:3, group:13, category:"metal", mass:26.982, en:1.61, valence:3, valency:"3", shells:[2,8,3]},
+    {Z:14, sym:"Si", name:"Silicon", period:3, group:14, category:"metalloid", mass:28.085, en:1.90, valence:4, valency:"4", shells:[2,8,4]},
+    {Z:15, sym:"P", name:"Phosphorus", period:3, group:15, category:"nonmetal", mass:30.974, en:2.19, valence:5, valency:"3,5", shells:[2,8,5]},
+    {Z:16, sym:"S", name:"Sulfur", period:3, group:16, category:"nonmetal", mass:32.06, en:2.58, valence:6, valency:"2,4,6", shells:[2,8,6]},
+    {Z:17, sym:"Cl", name:"Chlorine", period:3, group:17, category:"halogen", mass:35.45, en:3.16, valence:7, valency:"1", shells:[2,8,7]},
+    {Z:18, sym:"Ar", name:"Argon", period:3, group:18, category:"noble", mass:39.948, en:null, valence:8, valency:"0", shells:[2,8,8]},
+    // Period 4 (main IB set: include common ones + transition block positions)
+    {Z:19, sym:"K", name:"Potassium", period:4, group:1, category:"alkali", mass:39.098, en:0.82, valence:1, valency:"1", shells:[2,8,8,1]},
+    {Z:20, sym:"Ca", name:"Calcium", period:4, group:2, category:"alkaline", mass:40.078, en:1.00, valence:2, valency:"2", shells:[2,8,8,2]},
+    {Z:21, sym:"Sc", name:"Scandium", period:4, group:3, category:"transition", mass:44.956, en:1.36, valence:2, valency:"3", shells:[2,8,9,2]},
+    {Z:22, sym:"Ti", name:"Titanium", period:4, group:4, category:"transition", mass:47.867, en:1.54, valence:2, valency:"4", shells:[2,8,10,2]},
+    {Z:23, sym:"V", name:"Vanadium", period:4, group:5, category:"transition", mass:50.942, en:1.63, valence:2, valency:"5", shells:[2,8,11,2]},
+    {Z:24, sym:"Cr", name:"Chromium", period:4, group:6, category:"transition", mass:51.996, en:1.66, valence:1, valency:"2,3,6", shells:[2,8,13,1]},
+    {Z:25, sym:"Mn", name:"Manganese", period:4, group:7, category:"transition", mass:54.938, en:1.55, valence:2, valency:"2,4,7", shells:[2,8,13,2]},
+    {Z:26, sym:"Fe", name:"Iron", period:4, group:8, category:"transition", mass:55.845, en:1.83, valence:2, valency:"2,3", shells:[2,8,14,2]},
+    {Z:27, sym:"Co", name:"Cobalt", period:4, group:9, category:"transition", mass:58.933, en:1.88, valence:2, valency:"2,3", shells:[2,8,15,2]},
+    {Z:28, sym:"Ni", name:"Nickel", period:4, group:10, category:"transition", mass:58.693, en:1.91, valence:2, valency:"2", shells:[2,8,16,2]},
+    {Z:29, sym:"Cu", name:"Copper", period:4, group:11, category:"transition", mass:63.546, en:1.90, valence:1, valency:"1,2", shells:[2,8,18,1]},
+    {Z:30, sym:"Zn", name:"Zinc", period:4, group:12, category:"transition", mass:65.38, en:1.65, valence:2, valency:"2", shells:[2,8,18,2]},
+    {Z:31, sym:"Ga", name:"Gallium", period:4, group:13, category:"metal", mass:69.723, en:1.81, valence:3, valency:"3", shells:[2,8,18,3]},
+    {Z:32, sym:"Ge", name:"Germanium", period:4, group:14, category:"metalloid", mass:72.630, en:2.01, valence:4, valency:"4", shells:[2,8,18,4]},
+    {Z:33, sym:"As", name:"Arsenic", period:4, group:15, category:"metalloid", mass:74.922, en:2.18, valence:5, valency:"3,5", shells:[2,8,18,5]},
+    {Z:34, sym:"Se", name:"Selenium", period:4, group:16, category:"nonmetal", mass:78.971, en:2.55, valence:6, valency:"2,4,6", shells:[2,8,18,6]},
+    {Z:35, sym:"Br", name:"Bromine", period:4, group:17, category:"halogen", mass:79.904, en:2.96, valence:7, valency:"1", shells:[2,8,18,7]},
+    {Z:36, sym:"Kr", name:"Krypton", period:4, group:18, category:"noble", mass:83.798, en:3.00, valence:8, valency:"0", shells:[2,8,18,8]},
+
+    // Minimal placeholders for 37–118 so the table is full and search works.
+    // For IB bonding practice, students mostly use main-group + a few transitions.
+    // You can extend these later.
+    ...Array.from({length:118-36}, (_,i)=>{
+      const Z = 37+i;
+      const sym = [
+        "Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe",
+        "Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu",
+        "Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn",
+        "Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr",
+        "Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"
+      ][i] || ("E"+Z);
+      const names = {
+        Rb:"Rubidium",Sr:"Strontium",Y:"Yttrium",Zr:"Zirconium",Nb:"Niobium",Mo:"Molybdenum",Tc:"Technetium",Ru:"Ruthenium",Rh:"Rhodium",Pd:"Palladium",Ag:"Silver",Cd:"Cadmium",In:"Indium",Sn:"Tin",Sb:"Antimony",Te:"Tellurium",I:"Iodine",Xe:"Xenon",
+        Cs:"Caesium",Ba:"Barium",La:"Lanthanum",Ce:"Cerium",Pr:"Praseodymium",Nd:"Neodymium",Pm:"Promethium",Sm:"Samarium",Eu:"Europium",Gd:"Gadolinium",Tb:"Terbium",Dy:"Dysprosium",Ho:"Holmium",Er:"Erbium",Tm:"Thulium",Yb:"Ytterbium",Lu:"Lutetium",
+        Hf:"Hafnium",Ta:"Tantalum",W:"Tungsten",Re:"Rhenium",Os:"Osmium",Ir:"Iridium",Pt:"Platinum",Au:"Gold",Hg:"Mercury",Tl:"Thallium",Pb:"Lead",Bi:"Bismuth",Po:"Polonium",At:"Astatine",Rn:"Radon",
+        Fr:"Francium",Ra:"Radium",Ac:"Actinium",Th:"Thorium",Pa:"Protactinium",U:"Uranium",Np:"Neptunium",Pu:"Plutonium",Am:"Americium",Cm:"Curium",Bk:"Berkelium",Cf:"Californium",Es:"Einsteinium",Fm:"Fermium",Md:"Mendelevium",No:"Nobelium",Lr:"Lawrencium",
+        Rf:"Rutherfordium",Db:"Dubnium",Sg:"Seaborgium",Bh:"Bohrium",Hs:"Hassium",Mt:"Meitnerium",Ds:"Darmstadtium",Rg:"Roentgenium",Cn:"Copernicium",Nh:"Nihonium",Fl:"Flerovium",Mc:"Moscovium",Lv:"Livermorium",Ts:"Tennessine",Og:"Oganesson"
+      };
+      // Period/group mapping for 37–118 is simplified to place them correctly in the grid below.
+      return {
+        Z,
+        sym,
+        name: names[sym] || ("Element " + Z),
+        period: null,
+        group: null,
+        category: "metal",
+        mass: null,
+        en: null,
+        valence: null,
+        valency: "—",
+        shells: []
+      };
+    })
+  ];
+
+  // Grid placement for 118: [Z, period, group]
+  // Includes lanthanides/actinides placed in separate rows (period 8/9 for display).
+  // This is a compact mapping adequate for layout and search.
+  const POS = new Map([
+    // Period 1
+    [1,[1,1]],[2,[1,18]],
+    // Period 2
+    [3,[2,1]],[4,[2,2]],[5,[2,13]],[6,[2,14]],[7,[2,15]],[8,[2,16]],[9,[2,17]],[10,[2,18]],
+    // Period 3
+    [11,[3,1]],[12,[3,2]],[13,[3,13]],[14,[3,14]],[15,[3,15]],[16,[3,16]],[17,[3,17]],[18,[3,18]],
+    // Period 4
+    [19,[4,1]],[20,[4,2]],[21,[4,3]],[22,[4,4]],[23,[4,5]],[24,[4,6]],[25,[4,7]],[26,[4,8]],[27,[4,9]],[28,[4,10]],[29,[4,11]],[30,[4,12]],[31,[4,13]],[32,[4,14]],[33,[4,15]],[34,[4,16]],[35,[4,17]],[36,[4,18]],
+    // Period 5
+    [37,[5,1]],[38,[5,2]],[39,[5,3]],[40,[5,4]],[41,[5,5]],[42,[5,6]],[43,[5,7]],[44,[5,8]],[45,[5,9]],[46,[5,10]],[47,[5,11]],[48,[5,12]],[49,[5,13]],[50,[5,14]],[51,[5,15]],[52,[5,16]],[53,[5,17]],[54,[5,18]],
+    // Period 6
+    [55,[6,1]],[56,[6,2]],[57,[6,3]],[72,[6,4]],[73,[6,5]],[74,[6,6]],[75,[6,7]],[76,[6,8]],[77,[6,9]],[78,[6,10]],[79,[6,11]],[80,[6,12]],[81,[6,13]],[82,[6,14]],[83,[6,15]],[84,[6,16]],[85,[6,17]],[86,[6,18]],
+    // Period 7
+    [87,[7,1]],[88,[7,2]],[89,[7,3]],[104,[7,4]],[105,[7,5]],[106,[7,6]],[107,[7,7]],[108,[7,8]],[109,[7,9]],[110,[7,10]],[111,[7,11]],[112,[7,12]],[113,[7,13]],[114,[7,14]],[115,[7,15]],[116,[7,16]],[117,[7,17]],[118,[7,18]],
+    // Lanthanides (display row 8, group 4–17)
+    ...Array.from({length:15}, (_,i)=>[58+i,[8,4+i]]),
+    // Actinides (display row 9, group 4–17)
+    ...Array.from({length:15}, (_,i)=>[90+i,[9,4+i]])
+  ]);
+
+  // Backfill period/group for placeholder elements from POS
+  for (const el of ELEMENTS) {
+    const p = POS.get(el.Z);
+    if (p) {
+      el.period = p[0];
+      el.group = p[1];
+    }
+  }
+
+  // Derive categories for placeholders by group/position (simple)
+  function deriveCategory(el){
+    if (el.Z === 1) return "nonmetal";
+    if (el.group === 18) return "noble";
+    if (el.group === 17) return "halogen";
+    if (el.group === 1 && el.Z !== 1) return "alkali";
+    if (el.group === 2) return "alkaline";
+    if (el.period === 8) return "lanth";
+    if (el.period === 9) return "act";
+    if (el.group >=3 && el.group <= 12) return "transition";
+    // Rough: top-right are nonmetals; others metals.
+    if (el.group >= 13 && el.group <= 16) {
+      // metalloids diagonal hint
+      const metalloids = new Set([5,14,32,33,51,52,84]);
+      if (metalloids.has(el.Z)) return "metalloid";
+      const nonmetals = new Set([6,7,8,9,15,16,17,34,35,53]);
+      if (nonmetals.has(el.Z)) return "nonmetal";
+      return "metal";
+    }
+    return "metal";
+  }
+  for (const el of ELEMENTS) {
+    if (!el.category || el.category === "metal") {
+      el.category = deriveCategory(el);
+    }
+    // Valence for main group only (IB bonding focus)
+    if (el.valence == null && el.group != null) {
+      if (el.group === 18) el.valence = el.Z === 2 ? 2 : 8;
+      else if (el.group >= 13 && el.group <= 18) el.valence = (el.group - 10);
+      else if (el.group === 1) el.valence = 1;
+      else if (el.group === 2) el.valence = 2;
+      else el.valence = null;
+    }
+  }
+
+  // ==============================================================
+  // UI wiring
+  // ==============================================================
+  const $ = (s)=>document.querySelector(s);
+  const ptable = $("#ptable");
+  const search = $("#search");
+  const colorMode = $("#colorMode");
+
+  const dName = $("#dName"), dSym = $("#dSym"), dZ = $("#dZ"), dMass = $("#dMass"), dGP = $("#dGP"), dCat = $("#dCat"), dVal = $("#dVal"), dValency = $("#dValency"), dEN = $("#dEN");
+  const bohrCanvas = $("#bohrCanvas");
+  const ctxBohr = bohrCanvas.getContext("2d");
+  const btnAddToBuilder = $("#btnAddToBuilder");
+  const typeBadge = (t)=>t;
+  const modeLabel = $("#modeLabel");
+  const bondLabel = $("#bondLabel");
+
+  // Builder
+  const molCanvas = $("#molCanvas");
+  const ctxMol = molCanvas.getContext("2d");
+  const mSelect = $("#mSelect"), mBond = $("#mBond"), mErase = $("#mErase"), mClear = $("#mClear");
+  const bondTypeSel = $("#bondType");
+  const sumFormula = $("#sumFormula"), sumMass = $("#sumMass"), sumBonds = $("#sumBonds"), sumBonding = $("#sumBonding");
+  const health = $("#health"), healthDetails = $("#healthDetails");
+
+  let selectedZ = 6;
+
+  // ==============================================================
+  // Periodic table render
+  // ==============================================================
+
+  function catClass(cat){
+    return {
+      nonmetal:"cat-nonmetal",
+      metalloid:"cat-metalloid",
+      metal:"cat-metal",
+      noble:"cat-noble",
+      halogen:"cat-halogen",
+      alkali:"cat-alkali",
+      alkaline:"cat-alkaline",
+      transition:"cat-transition",
+      lanth:"cat-lanth",
+      act:"cat-act"
+    }[cat] || "cat-metal";
+  }
+
+  function renderTable(){
+    ptable.innerHTML = "";
+
+    // Build a map for quick lookup by (period, group)
+    const at = new Map();
+    for (const el of ELEMENTS) {
+      if (el.period == null || el.group == null) continue;
+      at.set(`${el.period},${el.group}`, el);
+    }
+
+    const totalRows = 9; // 1–7 + lanth row 8 + act row 9
+
+    for (let period = 1; period <= totalRows; period++){
+      for (let group = 1; group <= 18; group++){
+        const cell = document.createElement("div");
+        const el = at.get(`${period},${group}`);
+
+        if (!el) {
+          // Empty cell
+          cell.style.minHeight = "52px";
+          cell.style.border = "1px solid rgba(255,255,255,0.06)";
+          cell.style.borderRadius = "10px";
+          cell.style.background = "rgba(255,255,255,0.01)";
+          ptable.appendChild(cell);
+          continue;
+        }
+
+        cell.className = `el ${catClass(el.category)}`;
+        if (el.Z === selectedZ) cell.classList.add("selected");
+
+        // Color modes
+        const mode = colorMode.value;
+        if (mode === "group") {
+          const hue = Math.round((group/18)*280);
+          cell.style.background = `hsla(${hue}, 90%, 60%, 0.10)`;
+        } else if (mode === "valence") {
+          const v = el.valence ?? 0;
+          const hue = Math.round((v/8)*120); // green-ish range
+          cell.style.background = `hsla(${hue}, 90%, 60%, 0.12)`;
+        }
+
+        cell.innerHTML = `
+          <div class="num">${el.Z}</div>
+          <div class="sym">${el.sym}</div>
+          <div class="name">${el.name}</div>
+        `;
+
+        cell.addEventListener("click", ()=>{
+          selectedZ = el.Z;
+          updateDetails();
+          renderTable();
+        });
+
+        ptable.appendChild(cell);
+      }
+    }
+  }
+
+  function updateDetails(){
+    const el = ELEMENTS.find(e=>e.Z===selectedZ);
+    if (!el) return;
+    dName.textContent = el.name;
+    dSym.textContent = el.sym;
+    dZ.textContent = String(el.Z);
+    dMass.textContent = el.mass != null ? String(el.mass) : "—";
+    dGP.textContent = el.group && el.period ? `${el.group} / ${el.period <= 7 ? el.period : (el.period===8?"Lanthanides":"Actinides")}` : "—";
+    dCat.textContent = el.category;
+    dVal.textContent = el.valence != null ? String(el.valence) : "—";
+    dValency.textContent = el.valency || "—";
+    dEN.textContent = el.en != null ? String(el.en) : "—";
+
+    drawBohr(el);
+  }
+
+  // ==============================================================
+  // Bohr model (simplified)
+  // ==============================================================
+  function drawBohr(el){
+    const w = bohrCanvas.width, h = bohrCanvas.height;
+    ctxBohr.clearRect(0,0,w,h);
+
+    // Background
+    ctxBohr.fillStyle = "rgba(0,0,0,0.12)";
+    ctxBohr.fillRect(0,0,w,h);
+
+    const cx = w/2, cy = h/2 + 6;
+
+    // Nucleus
+    ctxBohr.beginPath();
+    ctxBohr.fillStyle = "rgba(233,236,255,0.9)";
+    ctxBohr.arc(cx, cy, 12, 0, Math.PI*2);
+    ctxBohr.fill();
+
+    ctxBohr.fillStyle = "rgba(0,0,0,0.65)";
+    ctxBohr.font = "bold 12px ui-sans-serif, system-ui";
+    ctxBohr.textAlign = "center";
+    ctxBohr.textBaseline = "middle";
+    ctxBohr.fillText(el.sym, cx, cy);
+
+    // Shells
+    const shells = (el.shells && el.shells.length) ? el.shells : approximateShells(el.Z);
+    const maxR = 90;
+    const step = shells.length ? maxR / (shells.length) : 20;
+
+    for (let i=0;i<shells.length;i++){
+      const r = 18 + step*(i+1);
+      ctxBohr.beginPath();
+      ctxBohr.strokeStyle = "rgba(233,236,255,0.22)";
+      ctxBohr.lineWidth = 1;
+      ctxBohr.arc(cx, cy, r, 0, Math.PI*2);
+      ctxBohr.stroke();
+
+      // electrons
+      const n = shells[i];
+      for (let k=0;k<n;k++){
+        const ang = (k/n) * Math.PI*2 + (i*0.6);
+        const ex = cx + Math.cos(ang)*r;
+        const ey = cy + Math.sin(ang)*r;
+        ctxBohr.beginPath();
+        ctxBohr.fillStyle = "rgba(59,130,246,0.85)";
+        ctxBohr.arc(ex, ey, 3.2, 0, Math.PI*2);
+        ctxBohr.fill();
+      }
+    }
+
+    // Caption
+    ctxBohr.fillStyle = "rgba(233,236,255,0.75)";
+    ctxBohr.font = "12px ui-sans-serif, system-ui";
+    ctxBohr.textAlign = "center";
+    ctxBohr.fillText(`Shells: ${shells.join("-")}`, cx, 16);
+  }
+
+  function approximateShells(Z){
+    // Simplified shell filling for visualization only
+    const caps = [2,8,18,32,32,18,8];
+    let remaining = Z;
+    const out = [];
+    for (const c of caps){
+      if (remaining <= 0) break;
+      const take = Math.min(c, remaining);
+      out.push(take);
+      remaining -= take;
+    }
+    return out;
+  }
+
+  // ==============================================================
+  // Search
+  // ==============================================================
+  function applySearch(){
+    const q = search.value.trim().toLowerCase();
+    if (!q){
+      renderTable();
+      return;
+    }
+    // Find best match and select it
+    const asNum = parseInt(q,10);
+    let found = null;
+    if (!Number.isNaN(asNum)) {
+      found = ELEMENTS.find(e=>e.Z===asNum);
+    }
+    if (!found) {
+      found = ELEMENTS.find(e=>e.sym.toLowerCase()===q) || ELEMENTS.find(e=>e.name.toLowerCase().includes(q));
+    }
+    if (found) {
+      selectedZ = found.Z;
+      updateDetails();
+    }
+    renderTable();
+  }
+
+  search.addEventListener("input", ()=>{
+    // debounce-ish
+    clearTimeout(search._t);
+    search._t = setTimeout(applySearch, 120);
+  });
+
+  colorMode.addEventListener("change", renderTable);
+
+  // ==============================================================
+  // Molecule Builder (2D Lewis-ish builder)
+  // ==============================================================
+
+  // Canvas sizing
+  function fitMolCanvas(){
+    const rect = molCanvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    molCanvas.width = Math.floor(rect.width * dpr);
+    molCanvas.height = Math.floor(rect.height * dpr);
+    ctxMol.setTransform(dpr,0,0,dpr,0,0);
+    drawMol();
+  }
+  window.addEventListener("resize", ()=>{ clearTimeout(window._rt); window._rt=setTimeout(fitMolCanvas,80); });
+
+  // Builder state
+  const builder = {
+    mode: "select", // select | bond | erase
+    bondOrder: 1,
+    atoms: [], // {id, Z, x,y, charge, labelOverride?}
+    bonds: [], // {a,b, order}
+    dragId: null,
+    dragDx: 0,
+    dragDy: 0,
+    bondFirst: null
+  };
+
+  function setMode(mode){
+    builder.mode = mode;
+    builder.bondFirst = null;
+    modeLabel.textContent = mode === "select" ? "Select" : (mode === "bond" ? "Bond" : "Delete");
+
+    // Button styling
+    [mSelect,mBond,mErase].forEach(b=>b.classList.remove("primary"));
+    if (mode === "select") mSelect.classList.add("primary");
+    if (mode === "bond") mBond.classList.add("primary");
+    if (mode === "erase") mErase.classList.add("primary");
+
+    drawMol();
+  }
+
+  function setBondOrder(order){
+    builder.bondOrder = order;
+    bondLabel.textContent = order === 1 ? "Single" : (order === 2 ? "Double" : "Triple");
+    drawMol();
+  }
+
+  mSelect.addEventListener("click", ()=>setMode("select"));
+  mBond.addEventListener("click", ()=>setMode("bond"));
+  mErase.addEventListener("click", ()=>setMode("erase"));
+  mClear.addEventListener("click", ()=>{ builder.atoms=[]; builder.bonds=[]; builder.bondFirst=null; updateSummary(); drawMol(); });
+  bondTypeSel.addEventListener("change", ()=>setBondOrder(parseInt(bondTypeSel.value,10)));
+
+  function addSelectedAtom(){
+    const el = ELEMENTS.find(e=>e.Z===selectedZ);
+    if (!el) return;
+
+    const rect = molCanvas.getBoundingClientRect();
+    const x = rect.width * (0.35 + Math.random()*0.3);
+    const y = rect.height * (0.35 + Math.random()*0.3);
+
+    builder.atoms.push({
+      id: cryptoRandomId(),
+      Z: el.Z,
+      x, y,
+      charge: 0
+    });
+
+    updateSummary();
+    drawMol();
+  }
+
+  btnAddToBuilder.addEventListener("click", addSelectedAtom);
+
+  function cryptoRandomId(){
+    // simple id
+    return Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2);
+  }
+
+  function atomRadius(Z){
+    // visual only
+    if (Z === 1) return 18;
+    if (Z <= 10) return 22;
+    if (Z <= 20) return 24;
+    return 26;
+  }
+
+  function getAtomAt(x,y){
+    for (let i=builder.atoms.length-1;i>=0;i--){
+      const a = builder.atoms[i];
+      const r = atomRadius(a.Z);
+      const dx=x-a.x, dy=y-a.y;
+      if (dx*dx+dy*dy <= r*r) return a;
+    }
+    return null;
+  }
+
+  function removeAtom(atom){
+    builder.bonds = builder.bonds.filter(b=>b.a!==atom.id && b.b!==atom.id);
+    builder.atoms = builder.atoms.filter(a=>a.id!==atom.id);
+    if (builder.bondFirst === atom.id) builder.bondFirst = null;
+    updateSummary();
+  }
+
+  function toggleBond(aId,bId, order){
+    if (aId === bId) return;
+    const existing = builder.bonds.find(b=>(b.a===aId && b.b===bId) || (b.a===bId && b.b===aId));
+    if (!existing) {
+      builder.bonds.push({a:aId,b:bId,order});
+    } else {
+      // If same order, remove; else set order
+      if (existing.order === order) {
+        builder.bonds = builder.bonds.filter(b=>b!==existing);
+      } else {
+        existing.order = order;
+      }
+    }
+    updateSummary();
+  }
+
+  // Mouse / touch
+  function getCanvasXY(evt){
+    const rect = molCanvas.getBoundingClientRect();
+    const x = (evt.clientX - rect.left);
+    const y = (evt.clientY - rect.top);
+    return {x,y};
+  }
+
+  molCanvas.addEventListener("mousedown", (e)=>{
+    const {x,y} = getCanvasXY(e);
+    const a = getAtomAt(x,y);
+    if (!a) {
+      builder.dragId = null;
+      builder.bondFirst = null;
+      drawMol();
+      return;
+    }
+
+    if (builder.mode === "select") {
+      builder.dragId = a.id;
+      builder.dragDx = x - a.x;
+      builder.dragDy = y - a.y;
+    } else if (builder.mode === "erase") {
+      removeAtom(a);
+      drawMol();
+    } else if (builder.mode === "bond") {
+      if (!builder.bondFirst) {
+        builder.bondFirst = a.id;
+      } else {
+        toggleBond(builder.bondFirst, a.id, builder.bondOrder);
+        builder.bondFirst = null;
+      }
+      drawMol();
+    }
+  });
+
+  window.addEventListener("mousemove", (e)=>{
+    if (!builder.dragId) return;
+    const rect = molCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const a = builder.atoms.find(a=>a.id===builder.dragId);
+    if (!a) return;
+    a.x = x - builder.dragDx;
+    a.y = y - builder.dragDy;
+    drawMol();
+  });
+
+  window.addEventListener("mouseup", ()=>{ builder.dragId=null; });
+
+  // Touch support
+  molCanvas.addEventListener("touchstart", (e)=>{
+    const t = e.touches[0];
+    if (!t) return;
+    const {x,y} = getCanvasXY(t);
+    const a = getAtomAt(x,y);
+    if (!a) { builder.dragId=null; builder.bondFirst=null; drawMol(); return; }
+
+    if (builder.mode === "select") {
+      builder.dragId = a.id;
+      builder.dragDx = x - a.x;
+      builder.dragDy = y - a.y;
+    } else if (builder.mode === "erase") {
+      removeAtom(a);
+      drawMol();
+    } else if (builder.mode === "bond") {
+      if (!builder.bondFirst) builder.bondFirst = a.id;
+      else { toggleBond(builder.bondFirst, a.id, builder.bondOrder); builder.bondFirst=null; }
+      drawMol();
+    }
+    e.preventDefault();
+  }, {passive:false});
+
+  molCanvas.addEventListener("touchmove", (e)=>{
+    const t = e.touches[0];
+    if (!t || !builder.dragId) return;
+    const {x,y} = getCanvasXY(t);
+    const a = builder.atoms.find(a=>a.id===builder.dragId);
+    if (!a) return;
+    a.x = x - builder.dragDx;
+    a.y = y - builder.dragDy;
+    drawMol();
+    e.preventDefault();
+  }, {passive:false});
+
+  molCanvas.addEventListener("touchend", ()=>{ builder.dragId=null; });
+
+  function drawMol(){
+    const rect = molCanvas.getBoundingClientRect();
+    ctxMol.clearRect(0,0,rect.width,rect.height);
+
+    // background grid
+    ctxMol.save();
+    ctxMol.fillStyle = "rgba(0,0,0,0.08)";
+    ctxMol.fillRect(0,0,rect.width,rect.height);
+
+    ctxMol.strokeStyle = "rgba(255,255,255,0.06)";
+    ctxMol.lineWidth = 1;
+    const step = 28;
+    for (let x=0;x<rect.width;x+=step){
+      ctxMol.beginPath(); ctxMol.moveTo(x,0); ctxMol.lineTo(x,rect.height); ctxMol.stroke();
+    }
+    for (let y=0;y<rect.height;y+=step){
+      ctxMol.beginPath(); ctxMol.moveTo(0,y); ctxMol.lineTo(rect.width,y); ctxMol.stroke();
+    }
+    ctxMol.restore();
+
+    // bonds
+    for (const b of builder.bonds){
+      const a1 = builder.atoms.find(a=>a.id===b.a);
+      const a2 = builder.atoms.find(a=>a.id===b.b);
+      if (!a1 || !a2) continue;
+      drawBond(a1,a2,b.order);
+    }
+
+    // bond-first highlight
+    if (builder.bondFirst) {
+      const a = builder.atoms.find(x=>x.id===builder.bondFirst);
+      if (a) {
+        ctxMol.beginPath();
+        ctxMol.strokeStyle = "rgba(251,191,36,0.85)";
+        ctxMol.lineWidth = 2;
+        ctxMol.arc(a.x,a.y, atomRadius(a.Z)+6, 0, Math.PI*2);
+        ctxMol.stroke();
+      }
+    }
+
+    // atoms
+    for (const a of builder.atoms){
+      drawAtom(a);
+    }
+
+    // mode hint
+    ctxMol.fillStyle = "rgba(233,236,255,0.8)";
+    ctxMol.font = "12px ui-sans-serif, system-ui";
+    ctxMol.textAlign = "left";
+    ctxMol.fillText(`Mode: ${builder.mode.toUpperCase()}  |  Bond: ${builder.bondOrder===1?'single':builder.bondOrder===2?'double':'triple'}`, 12, 18);
+  }
+
+  function drawBond(a1,a2,order){
+    const dx = a2.x - a1.x;
+    const dy = a2.y - a1.y;
+    const len = Math.hypot(dx,dy) || 1;
+    const ux = dx/len, uy = dy/len;
+
+    const r1 = atomRadius(a1.Z);
+    const r2 = atomRadius(a2.Z);
+
+    // offset so lines start/stop at atom boundary
+    const x1 = a1.x + ux*r1;
+    const y1 = a1.y + uy*r1;
+    const x2 = a2.x - ux*r2;
+    const y2 = a2.y - uy*r2;
+
+    // perpendicular for multi-bond
+    const px = -uy;
+    const py = ux;
+    const sep = 4;
+
+    ctxMol.strokeStyle = "rgba(233,236,255,0.75)";
+    ctxMol.lineWidth = 2;
+
+    const lines = order === 1 ? [0] : (order === 2 ? [-sep, sep] : [-sep, 0, sep]);
+    for (const off of lines){
+      ctxMol.beginPath();
+      ctxMol.moveTo(x1 + px*off, y1 + py*off);
+      ctxMol.lineTo(x2 + px*off, y2 + py*off);
+      ctxMol.stroke();
+    }
+  }
+
+  function drawAtom(a){
+    const el = ELEMENTS.find(e=>e.Z===a.Z);
+    const r = atomRadius(a.Z);
+
+    // Fill color by broad category
+    const cat = el?.category || "metal";
+    let fill = "rgba(255,255,255,0.08)";
+    if (cat === "nonmetal") fill = "rgba(59,130,246,0.18)";
+    if (cat === "metalloid") fill = "rgba(251,191,36,0.16)";
+    if (cat === "noble") fill = "rgba(124,58,237,0.18)";
+    if (cat === "halogen") fill = "rgba(236,72,153,0.14)";
+    if (cat === "alkali") fill = "rgba(244,63,94,0.12)";
+    if (cat === "alkaline") fill = "rgba(249,115,22,0.12)";
+    if (cat === "transition") fill = "rgba(147,197,253,0.10)";
+
+    ctxMol.beginPath();
+    ctxMol.fillStyle = fill;
+    ctxMol.strokeStyle = "rgba(255,255,255,0.18)";
+    ctxMol.lineWidth = 1;
+    ctxMol.arc(a.x,a.y,r,0,Math.PI*2);
+    ctxMol.fill();
+    ctxMol.stroke();
+
+    // Symbol
+    ctxMol.fillStyle = "rgba(233,236,255,0.92)";
+    ctxMol.font = `700 ${r>=24?14:13}px ui-sans-serif, system-ui`;
+    ctxMol.textAlign = "center";
+    ctxMol.textBaseline = "middle";
+    ctxMol.fillText(el?.sym || "?", a.x, a.y);
+
+    // Valence dots (Lewis-style, simplified)
+    const v = el?.valence;
+    if (v != null && v <= 8) {
+      drawValenceDots(a.x,a.y,r+10,v);
+    }
+  }
+
+  function drawValenceDots(cx,cy,r,v){
+    // place up to 8 dots around (pairs) — simplified teaching visualization
+    const positions = [
+      {x:0,y:-r},{x:r,y:0},{x:0,y:r},{x:-r,y:0},
+      {x:6,y:-r},{x:r,y:6},{x:-6,y:r},{x:-r,y:-6}
+    ];
+    const count = clamp(v,0,8);
+    for (let i=0;i<count;i++){
+      const p = positions[i];
+      ctxMol.beginPath();
+      ctxMol.fillStyle = "rgba(251,191,36,0.85)";
+      ctxMol.arc(cx+p.x, cy+p.y, 2.2, 0, Math.PI*2);
+      ctxMol.fill();
+    }
+  }
+
+  // ==============================================================
+  // Summary + simple IB heuristics
+  // ==============================================================
+
+  function updateSummary(){
+    // formula
+    const counts = new Map();
+    for (const a of builder.atoms){
+      counts.set(a.Z, (counts.get(a.Z)||0)+1);
+    }
+    const parts = Array.from(counts.entries())
+      .map(([Z,n])=>({Z,n, sym: ELEMENTS.find(e=>e.Z===Z)?.sym || `E${Z}`}))
+      // Hill system-ish: C then H then alphabetical; otherwise alphabetical
+      .sort((p,q)=>{
+        if (p.sym === "C" && q.sym !== "C") return -1;
+        if (q.sym === "C" && p.sym !== "C") return 1;
+        if (p.sym === "H" && q.sym !== "H" && (counts.has(6))) return -1;
+        if (q.sym === "H" && p.sym !== "H" && (counts.has(6))) return 1;
+        return p.sym.localeCompare(q.sym);
+      });
+
+    const formula = parts.map(p=>p.sym + (p.n>1 ? p.n : "")).join("") || "—";
+    sumFormula.textContent = formula;
+
+    // mass
+    let mass = 0;
+    let massKnown = true;
+    for (const [Z,n] of counts.entries()){
+      const el = ELEMENTS.find(e=>e.Z===Z);
+      if (!el || el.mass == null) { massKnown = false; continue; }
+      mass += el.mass * n;
+    }
+    sumMass.textContent = (builder.atoms.length===0) ? "—" : (massKnown ? mass.toFixed(3) : "— (incomplete data)");
+
+    sumBonds.textContent = String(builder.bonds.length);
+
+    // Bonding type heuristic
+    const anyMetal = builder.atoms.some(a=>{
+      const cat = ELEMENTS.find(e=>e.Z===a.Z)?.category;
+      return cat && (cat.includes("metal") || cat === "alkali" || cat === "alkaline" || cat === "transition" || cat === "lanth" || cat === "act");
+    });
+    const anyNonmetal = builder.atoms.some(a=>{
+      const cat = ELEMENTS.find(e=>e.Z===a.Z)?.category;
+      return cat === "nonmetal" || cat === "halogen" || cat === "noble" || cat === "metalloid";
+    });
+    sumBonding.textContent = (builder.atoms.length===0) ? "—" : (anyMetal && anyNonmetal ? "Likely ionic / polar" : "Likely covalent");
+
+    // health check
+    const report = evaluateStructure();
+    health.textContent = report.summary;
+    healthDetails.innerHTML = report.details;
+  }
+
+  function evaluateStructure(){
+    if (builder.atoms.length === 0) {
+      return {summary:"—", details:"—"};
+    }
+
+    // Build bond order sum per atom
+    const bondSum = new Map();
+    for (const a of builder.atoms) bondSum.set(a.id, 0);
+    for (const b of builder.bonds){
+      if (bondSum.has(b.a)) bondSum.set(b.a, bondSum.get(b.a)+b.order);
+      if (bondSum.has(b.b)) bondSum.set(b.b, bondSum.get(b.b)+b.order);
+    }
+
+    // Heuristic rules:
+    // - Typical bond count targets: H=1, F/Cl/Br/I=1, O=2, N=3, C=4
+    // - If bond sum is too high/low, warn
+    // - Octet approximation: for main-group nonmetals, target ~8 electrons around (2 for H). Here we infer: bonding electrons = 2*bonds; lone pairs not known.
+
+    const issues = [];
+    const ok = [];
+
+    for (const a of builder.atoms){
+      const el = ELEMENTS.find(e=>e.Z===a.Z);
+      const sum = bondSum.get(a.id) || 0;
+      const sym = el?.sym || "?";
+
+      const target = typicalTarget(sym);
+      if (target != null) {
+        if (sum === target) ok.push(`${sym}: bond order sum = ${sum} (typical)`);
+        else issues.push(`${sym}: bond order sum = ${sum} (typical ${target})`);
+      } else {
+        ok.push(`${sym}: no strict target (common variable valency)`);
+      }
+
+      // Octet hint for common elements
+      if (sym === "H") {
+        if (sum !== 1 && builder.atoms.length>1) issues.push(`H should usually have 1 bond (duet rule).`);
+      }
+    }
+
+    const score = issues.length === 0 ? 100 : Math.max(25, 100 - issues.length*12);
+    const summary = issues.length === 0 ? "Looks plausible for IB-level bonding (heuristic)." : "Some atoms look off — adjust connectivity or bond order.";
+
+    const details = `
+      <div><strong>Heuristic score:</strong> ${score}%</div>
+      <div style="margin-top:8px"><strong>OK:</strong><ul style="margin:6px 0 0 18px">${ok.slice(0,8).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}${ok.length>8?"<li>…</li>":""}</ul></div>
+      <div style="margin-top:8px"><strong>Fix:</strong>${issues.length?`<ul style="margin:6px 0 0 18px">${issues.slice(0,8).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}${issues.length>8?"<li>…</li>":""}</ul>`:" <span>None.</span>"}</div>
+      <div style="margin-top:10px" class="mini">Note: real Lewis structures require lone pairs and formal charges. This checker focuses on the most common IB bonding patterns (H=1, O=2, N=3, C=4, halogens=1).</div>
+    `;
+
+    return {summary, details};
+  }
+
+  function typicalTarget(sym){
+    if (sym === "H") return 1;
+    if (sym === "F" || sym === "Cl" || sym === "Br" || sym === "I") return 1;
+    if (sym === "O") return 2;
+    if (sym === "N") return 3;
+    if (sym === "C") return 4;
+    // P and S can vary (3/5 and 2/4/6) and transition metals vary.
+    return null;
+  }
+
+  function escapeHtml(s){
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+
+  // ==============================================================
+  // Init
+  // ==============================================================
+  function init(){
+    selectedZ = 6; // carbon
+    updateDetails();
+    renderTable();
+
+    // Builder init
+    setMode("select");
+    setBondOrder(1);
+    // Size canvas after layout
+    setTimeout(()=>{fitMolCanvas(); updateSummary();}, 60);
+  }
+
+  init();
+</script>
+</body>
+</html>
