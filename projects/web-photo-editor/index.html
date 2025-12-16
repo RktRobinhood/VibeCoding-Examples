@@ -12,11 +12,6 @@
       --border:rgba(255,255,255,.12);
       --ink:#e9ecff;
       --muted:rgba(233,236,255,.72);
-      --accent:rgba(124,58,237,.65);
-      --blue:rgba(59,130,246,.6);
-      --good:rgba(34,197,94,.55);
-      --warn:rgba(251,191,36,.55);
-      --bad:rgba(251,113,133,.55);
     }
     *{box-sizing:border-box}
     body{
@@ -38,6 +33,7 @@
 
     main{max-width:1400px;margin:0 auto;padding:10px 16px 24px;display:grid;grid-template-columns: 320px 1fr 340px;gap:12px;align-items:start}
     @media (max-width:1200px){main{grid-template-columns:1fr}}
+
     .panel{
       border:1px solid var(--border);
       border-radius:16px;
@@ -49,7 +45,7 @@
     .ph h2{margin:0;font-size:13px;letter-spacing:.2px}
     .pb{padding:12px}
 
-    button, input[type="text"], input[type="number"], select{
+    button, input[type="text"], select{
       border:1px solid var(--border);
       background:rgba(255,255,255,.04);
       color:var(--ink);
@@ -71,13 +67,7 @@
     .hint{color:var(--muted);font-size:12px;line-height:1.4}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;}
 
-    /* Canvas area */
-    .stageWrap{
-      border:1px solid var(--border);
-      border-radius:16px;
-      overflow:hidden;
-      background:rgba(0,0,0,.18);
-    }
+    .stageWrap{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:rgba(0,0,0,.18)}
     .stageTop{
       padding:10px 12px;border-bottom:1px solid var(--border);
       display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
@@ -94,7 +84,7 @@
     }
     @media (max-width:1200px){.stage{height:560px}}
     canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-    #glCanvas{pointer-events:none;opacity:1}
+    #glCanvas{pointer-events:none}
     #uiCanvas{pointer-events:auto}
     .dropBadge{
       position:absolute;left:12px;bottom:12px;
@@ -104,7 +94,6 @@
       padding:10px 12px;border-radius:14px;font-size:12px;max-width:520px;
     }
 
-    /* Layers */
     .layers{display:flex;flex-direction:column;gap:8px}
     .layer{
       border:1px solid var(--border);
@@ -123,7 +112,6 @@
     .miniBtn{padding:6px 8px;border-radius:10px}
     .slider{width:120px}
 
-    /* Controls groups */
     .group{border:1px solid var(--border);border-radius:14px;padding:10px;background:rgba(255,255,255,.03)}
     .group h3{margin:0 0 8px;font-size:13px}
     .kv{display:grid;grid-template-columns: 140px 1fr;gap:8px;align-items:center;font-size:12px;color:rgba(233,236,255,.86)}
@@ -136,13 +124,13 @@
     <nav class="topnav"><a href="../../index.html">← Back to projects</a></nav>
     <h1>Web Photo Editor (v1) — Canvas + WebGL</h1>
     <p class="sub">
-      GitHub Pages–friendly Photoshop-style editor: layers, brush/eraser/shapes/text, pan/zoom, undo/redo, and fast WebGL filters.
-      Use <span class="kbd">Space</span>+drag to pan, mousewheel to zoom. Drag an image onto the canvas to import.
+      Layers, brush/eraser/shapes/text, pan/zoom, undo/redo, and fast WebGL filters.
+      Pan: <span class="kbd">Space</span>+drag • Zoom: mouse wheel • Text: double-click to place.
     </p>
   </header>
 
   <main>
-    <!-- LEFT: Tools + Layers -->
+    <!-- LEFT -->
     <section class="panel">
       <div class="ph">
         <h2>Tools & layers</h2>
@@ -186,13 +174,13 @@
           </div>
           <div class="layers" id="layers"></div>
           <div class="hint" style="margin-top:8px">
-            Tip: keep the base image on a locked layer and draw on top.
+            Tip: import a base image, lock it, and draw on a layer above.
           </div>
         </div>
       </div>
     </section>
 
-    <!-- CENTER: Stage -->
+    <!-- CENTER -->
     <section class="panel stageWrap">
       <div class="stageTop">
         <div class="row">
@@ -207,20 +195,15 @@
         </div>
       </div>
       <div class="stage" id="stage">
-        <!-- We draw into a 2D offscreen composite, then WebGL renders filtered output to glCanvas. -->
         <canvas id="glCanvas"></canvas>
-        <!-- UI canvas handles interactions and also draws the unfiltered view while editing,
-             but we’ll still show the filtered output underneath for “Photoshop feel”. -->
         <canvas id="uiCanvas"></canvas>
-
         <div class="dropBadge" id="dropBadge">
-          Drop an image here to import. <span class="mono">PNG/JPG</span>.  
-          Pan: <span class="kbd">Space</span>+drag • Zoom: mouse wheel • Double-click text tool to place text.
+          Drop an image here to import. Pan: <span class="kbd">Space</span>+drag • Zoom: wheel • Text: double-click
         </div>
       </div>
     </section>
 
-    <!-- RIGHT: Filters -->
+    <!-- RIGHT -->
     <section class="panel">
       <div class="ph">
         <h2>WebGL filters</h2>
@@ -246,16 +229,7 @@
             <label class="pill"><input id="fInvert" type="checkbox"> Invert</label>
           </div>
           <div class="hint" style="margin-top:8px">
-            Filters apply to the full composite (v1). Next iteration can add per-layer filters + masks.
-          </div>
-        </div>
-
-        <div class="group" style="margin-top:10px">
-          <h3>IB student uses</h3>
-          <div class="hint">
-            • Annotate IA diagrams and lab photos (arrows/text).<br>
-            • Build “before/after” image analysis quickly with filters.<br>
-            • Create posters and visual study guides with layered assets.
+            Filters apply to the full composite in v1.
           </div>
         </div>
       </div>
@@ -265,10 +239,6 @@
 <script>
 /* ============================================================
    Web Photo Editor v1 (Canvas 2D + WebGL)
-   - Layers: raster layers backed by offscreen canvases
-   - UI canvas: interaction, previews, selection handles
-   - Composite canvas: offscreen merge of visible layers
-   - WebGL: draws composite texture with shader adjustments
    ============================================================ */
 
 const $ = (s)=>document.querySelector(s);
@@ -313,24 +283,11 @@ const fBlur = $("#fBlur");
 const fGray = $("#fGray");
 const fInvert = $("#fInvert");
 
-let TOOL = "move"; // move|brush|eraser|rect|ellipse|text
+let TOOL = "move";
 let bypass = false;
 
-// World/canvas coordinate system for document
-// We'll maintain a "document" size (w,h). If you import an image, we size doc to that image initially.
-const doc = {
-  w: 1200,
-  h: 800,
-};
-
-// View transform (screen <-> doc)
-const view = {
-  zoom: 1,
-  panX: 0,
-  panY: 0,
-  isPanning: false,
-  panStart: {x:0,y:0, px:0, py:0},
-};
+const doc = { w: 1200, h: 800 };
+const view = { zoom: 1, panX: 0, panY: 0, isPanning: false, panStart: {x:0,y:0, px:0, py:0} };
 
 function setZoom(z){
   view.zoom = Math.max(0.1, Math.min(8, z));
@@ -346,7 +303,9 @@ function resetView(){
 }
 btnResetView.addEventListener("click", resetView);
 
-// Layers (each raster layer: offscreen canvas)
+colorPick.addEventListener("input", ()=> colorHex.textContent = colorPick.value.toLowerCase());
+
+/* ---------------- LAYERS ---------------- */
 const layers = [];
 let activeLayerId = null;
 
@@ -357,28 +316,15 @@ function newLayer(name="Layer"){
   const ctx = c.getContext("2d");
   ctx.clearRect(0,0,c.width,c.height);
 
-  const layer = {
-    id, name,
-    canvas: c,
-    ctx,
-    visible: true,
-    locked: false,
-    opacity: 1,
-    // Transform at layer level (v1: simple translate/scale/rotate would be next; for now just translate)
-    x: 0,
-    y: 0,
-  };
-  layers.unshift(layer); // top-most at start
+  const layer = { id, name, canvas:c, ctx, visible:true, locked:false, opacity:1, x:0, y:0 };
+  layers.unshift(layer);
   activeLayerId = id;
   snapshot("new layer");
   renderLayersUI();
   requestRender();
   return layer;
 }
-
-function getActiveLayer(){
-  return layers.find(l => l.id === activeLayerId) || layers[0];
-}
+function getActiveLayer(){ return layers.find(l => l.id === activeLayerId) || layers[0]; }
 
 function renderLayersUI(){
   layersEl.innerHTML = "";
@@ -400,31 +346,12 @@ function renderLayersUI(){
         <button class="miniBtn bad" data-act="del" title="Delete">✕</button>
       </div>
     `;
+    row.addEventListener("mousedown", ()=>{ activeLayerId=l.id; renderLayersUI(); requestRender(); });
 
-    row.addEventListener("click", (e)=>{
-      // ignore clicks on inputs/buttons that act locally
-      if (e.target && (e.target.tagName==="INPUT" || e.target.tagName==="BUTTON" || e.target.closest("button"))) return;
-      activeLayerId = l.id;
-      renderLayersUI();
-      requestRender();
-    });
-
-    row.querySelectorAll("button, input").forEach(el=>{
-      el.addEventListener("click", (e)=>e.stopPropagation());
-      el.addEventListener("input", (e)=>e.stopPropagation());
-    });
-
-    // Actions
-    row.querySelector('[data-act="vis"]').addEventListener("click", ()=>{
-      l.visible = !l.visible;
-      renderLayersUI();
-      requestRender();
-    });
-    row.querySelector('[data-act="lock"]').addEventListener("click", ()=>{
-      l.locked = !l.locked;
-      renderLayersUI();
-    });
-    row.querySelector('[data-act="del"]').addEventListener("click", ()=>{
+    row.querySelector('[data-act="vis"]').addEventListener("click", (e)=>{ e.stopPropagation(); l.visible=!l.visible; renderLayersUI(); requestRender(); });
+    row.querySelector('[data-act="lock"]').addEventListener("click",(e)=>{ e.stopPropagation(); l.locked=!l.locked; renderLayersUI(); });
+    row.querySelector('[data-act="del"]').addEventListener("click",(e)=>{
+      e.stopPropagation();
       if (layers.length<=1) return alert("Keep at least one layer.");
       const idx = layers.findIndex(x=>x.id===l.id);
       layers.splice(idx,1);
@@ -433,47 +360,40 @@ function renderLayersUI(){
       renderLayersUI();
       requestRender();
     });
-    row.querySelector('[data-act="up"]').addEventListener("click", ()=>{
+    row.querySelector('[data-act="up"]').addEventListener("click",(e)=>{
+      e.stopPropagation();
       const idx = layers.findIndex(x=>x.id===l.id);
       if (idx<=0) return;
       [layers[idx-1], layers[idx]] = [layers[idx], layers[idx-1]];
-      snapshot("reorder");
-      renderLayersUI();
-      requestRender();
+      snapshot("reorder"); renderLayersUI(); requestRender();
     });
-    row.querySelector('[data-act="dn"]').addEventListener("click", ()=>{
+    row.querySelector('[data-act="dn"]').addEventListener("click",(e)=>{
+      e.stopPropagation();
       const idx = layers.findIndex(x=>x.id===l.id);
       if (idx<0 || idx>=layers.length-1) return;
       [layers[idx+1], layers[idx]] = [layers[idx], layers[idx+1]];
-      snapshot("reorder");
-      renderLayersUI();
-      requestRender();
+      snapshot("reorder"); renderLayersUI(); requestRender();
     });
-    row.querySelector('[data-act="op"]').addEventListener("input", (e)=>{
+    row.querySelector('[data-act="op"]').addEventListener("input",(e)=>{
+      e.stopPropagation();
       l.opacity = Number(e.target.value)/100;
-      renderLayersUI();
-      requestRender();
+      renderLayersUI(); requestRender();
     });
-    row.querySelector('[data-act="name"]').addEventListener("input", (e)=>{
+    row.querySelector('[data-act="name"]').addEventListener("input",(e)=>{
+      e.stopPropagation();
       l.name = e.target.value.slice(0,60);
-    });
-
-    // Activate on click anywhere
-    row.addEventListener("mousedown", ()=>{
-      activeLayerId = l.id;
-      renderLayersUI();
-      requestRender();
     });
 
     layersEl.appendChild(row);
   }
 }
 
-// Composite offscreen canvas (merged visible layers)
+btnNewLayer.addEventListener("click", ()=> newLayer(`Layer ${layers.length+1}`));
+
+/* ---------------- COMPOSITE ---------------- */
 const composite = document.createElement("canvas");
 const ctxC = composite.getContext("2d");
 
-// Resize document + all layer canvases
 function resizeDocument(w,h, preserve=true){
   doc.w = Math.max(1, Math.floor(w));
   doc.h = Math.max(1, Math.floor(h));
@@ -484,41 +404,41 @@ function resizeDocument(w,h, preserve=true){
 
   for (const l of layers){
     const old = l.canvas;
-    const oldCtx = l.ctx;
     const c = document.createElement("canvas");
     c.width = doc.w; c.height = doc.h;
     const ctx = c.getContext("2d");
-    if (preserve){
-      ctx.drawImage(old, 0,0);
-    }
+    if (preserve) ctx.drawImage(old, 0,0);
     l.canvas = c;
     l.ctx = ctx;
   }
   requestRender();
 }
 
-// History (simple snapshots: layer raster + settings)
-const history = {
-  undo: [],
-  redo: [],
-  max: 25
-};
+function renderComposite(){
+  composite.width = doc.w;
+  composite.height = doc.h;
+  ctxC.clearRect(0,0,doc.w,doc.h);
+  ctxC.save();
+  for (const l of [...layers].reverse()){
+    if (!l.visible) continue;
+    ctxC.globalAlpha = l.opacity;
+    ctxC.drawImage(l.canvas, l.x, l.y);
+  }
+  ctxC.restore();
+}
+
+/* ---------------- HISTORY ---------------- */
+const history = { undo: [], redo: [], max: 20 };
 
 function snapshot(reason="edit"){
-  // Capture layer images as dataURLs (v1: OK; not ideal for huge docs)
   const state = {
     doc: {w:doc.w, h:doc.h},
     layers: layers.map(l => ({
-      id: l.id,
-      name: l.name,
-      visible: l.visible,
-      locked: l.locked,
-      opacity: l.opacity,
-      x: l.x, y: l.y,
+      id:l.id, name:l.name, visible:l.visible, locked:l.locked, opacity:l.opacity, x:l.x, y:l.y,
       png: l.canvas.toDataURL("image/png")
     })),
     activeLayerId,
-    reason,
+    reason
   };
   history.undo.push(state);
   if (history.undo.length > history.max) history.undo.shift();
@@ -534,20 +454,12 @@ function applyState(state){
     const c = document.createElement("canvas");
     c.width = doc.w; c.height = doc.h;
     const ctx = c.getContext("2d");
-    const layer = {
-      id: L.id,
-      name: L.name,
-      visible: L.visible,
-      locked: L.locked,
-      opacity: L.opacity,
-      x: L.x, y: L.y,
-      canvas: c,
-      ctx,
-    };
-    layers.push(layer);
+    layers.push({
+      id:L.id, name:L.name, visible:L.visible, locked:L.locked, opacity:L.opacity, x:L.x, y:L.y,
+      canvas:c, ctx
+    });
   }
 
-  // Load images async, then render
   let remaining = state.layers.length;
   state.layers.forEach((L, idx)=>{
     const img = new Image();
@@ -563,16 +475,13 @@ function applyState(state){
     };
     img.src = L.png;
   });
-
-  sizeLabel.textContent = `${doc.w}×${doc.h}`;
 }
 
 function undo(){
-  if (history.undo.length <= 1) return; // keep initial
+  if (history.undo.length<=1) return;
   const cur = history.undo.pop();
   history.redo.push(cur);
-  const prev = history.undo[history.undo.length-1];
-  applyState(prev);
+  applyState(history.undo[history.undo.length-1]);
   updateUndoRedoButtons();
 }
 function redo(){
@@ -586,35 +495,25 @@ function updateUndoRedoButtons(){
   btnUndo.disabled = history.undo.length<=1;
   btnRedo.disabled = history.redo.length===0;
 }
-btnUndo.addEventListener("click", undo);
-btnRedo.addEventListener("click", redo);
+btnUndo.onclick = undo;
+btnRedo.onclick = redo;
 
-// Keybinds
-window.addEventListener("keydown", (e)=>{
+/* ---------------- KEYBINDS ---------------- */
+window.addEventListener("keydown",(e)=>{
   const isMac = navigator.platform.toLowerCase().includes("mac");
   const mod = isMac ? e.metaKey : e.ctrlKey;
   if (mod && e.key.toLowerCase()==="z" && !e.shiftKey){ e.preventDefault(); undo(); }
-  if (mod && (e.key.toLowerCase()==="z") && e.shiftKey){ e.preventDefault(); redo(); }
-  if (e.code==="Space" && !e.repeat){
-    view.isPanning = true;
-  }
+  if (mod && e.key.toLowerCase()==="z" && e.shiftKey){ e.preventDefault(); redo(); }
+  if (e.code==="Space" && !e.repeat) view.isPanning = true;
 });
-window.addEventListener("keyup", (e)=>{
-  if (e.code==="Space"){ view.isPanning = false; }
-});
+window.addEventListener("keyup",(e)=>{ if (e.code==="Space") view.isPanning = false; });
 
-// Tool switching
+/* ---------------- TOOLS ---------------- */
 function setTool(t){
   TOOL = t;
   [toolMove,toolBrush,toolEraser,toolRect,toolEllipse,toolText].forEach(b=>b.classList.remove("primary"));
-  ({
-    move: toolMove,
-    brush: toolBrush,
-    eraser: toolEraser,
-    rect: toolRect,
-    ellipse: toolEllipse,
-    text: toolText
-  }[t]).classList.add("primary");
+  ({move:toolMove, brush:toolBrush, eraser:toolEraser, rect:toolRect, ellipse:toolEllipse, text:toolText}[t])
+    .classList.add("primary");
   requestRender();
 }
 toolMove.onclick=()=>setTool("move");
@@ -624,16 +523,7 @@ toolRect.onclick=()=>setTool("rect");
 toolEllipse.onclick=()=>setTool("ellipse");
 toolText.onclick=()=>setTool("text");
 
-btnNewLayer.addEventListener("click", ()=>{
-  newLayer(`Layer ${layers.length+1}`);
-});
-
-// Color
-colorPick.addEventListener("input", ()=>{
-  colorHex.textContent = colorPick.value.toLowerCase();
-});
-
-// Import
+/* ---------------- IMPORT ---------------- */
 btnImport.addEventListener("click", ()=>fileInput.click());
 fileInput.addEventListener("change", async ()=>{
   const f = fileInput.files?.[0];
@@ -647,31 +537,29 @@ async function importImageFile(file){
   const img = await loadImage(url);
   URL.revokeObjectURL(url);
 
-  // If first import, size doc to image and create base layer
-  if (layers.length===1 && isLayerEmpty(layers[0])) {
-    resizeDocument(img.width, img.height, false);
-  }
+  if (layers.length===1 && isLayerEmpty(layers[0])) resizeDocument(img.width, img.height, false);
 
   const layer = newLayer(file.name.replace(/\.[^.]+$/,""));
   layer.ctx.clearRect(0,0,doc.w,doc.h);
-
-  // Fit image into doc at (0,0) (v1). If image larger, crop.
   layer.ctx.drawImage(img, 0,0);
-  layer.locked = false;
-  activeLayerId = layer.id;
-
   dropBadge.style.display = "none";
-  renderLayersUI();
+
   snapshot("import");
   requestRender();
 }
+
+stage.addEventListener("dragover", (e)=>{ e.preventDefault(); });
+stage.addEventListener("drop", async (e)=>{
+  e.preventDefault();
+  const f = e.dataTransfer?.files?.[0];
+  if (f && f.type.startsWith("image/")) await importImageFile(f);
+});
 
 function isLayerEmpty(layer){
   const img = layer.ctx.getImageData(0,0,Math.min(32,doc.w),Math.min(32,doc.h)).data;
   for (let i=3;i<img.length;i+=4) if (img[i]!==0) return false;
   return true;
 }
-
 function loadImage(src){
   return new Promise((res,rej)=>{
     const im = new Image();
@@ -681,32 +569,8 @@ function loadImage(src){
   });
 }
 
-// Drag/drop import
-stage.addEventListener("dragover", (e)=>{ e.preventDefault(); });
-stage.addEventListener("drop", async (e)=>{
-  e.preventDefault();
-  const f = e.dataTransfer?.files?.[0];
-  if (f && f.type.startsWith("image/")){
-    await importImageFile(f);
-  }
-});
-
-// Export (filtered output)
-btnExport.addEventListener("click", ()=>{
-  // Ensure latest composite->WebGL render, then extract gl canvas pixels
-  renderComposite();
-  renderGL();
-  const link = document.createElement("a");
-  link.download = "export.png";
-  link.href = glCanvas.toDataURL("image/png");
-  link.click();
-});
-
-// ============================================================
-// Coordinate transforms
-// ============================================================
+/* ---------------- COORDS ---------------- */
 function screenToDoc(x,y){
-  // x,y in UI canvas pixels
   const cx = uiCanvas.clientWidth/2;
   const cy = uiCanvas.clientHeight/2;
   const dx = (x - cx - view.panX) / view.zoom + doc.w/2;
@@ -721,9 +585,7 @@ function docToScreen(x,y){
   return {x:sx, y:sy};
 }
 
-// ============================================================
-// Drawing / interaction
-// ============================================================
+/* ---------------- DRAWING ---------------- */
 let mouse = {down:false, x:0,y:0, lastX:0,lastY:0};
 let dragLayer = null;
 let shapeStart = null;
@@ -736,8 +598,8 @@ uiCanvas.addEventListener("wheel", (e)=>{
   setZoom(view.zoom * factor);
 },{passive:false});
 
-uiCanvas.addEventListener("mousedown", (e)=>{
-  mouse.down = true;
+uiCanvas.addEventListener("mousedown",(e)=>{
+  mouse.down=true;
   mouse.x = mouse.lastX = e.offsetX;
   mouse.y = mouse.lastY = e.offsetY;
 
@@ -749,39 +611,28 @@ uiCanvas.addEventListener("mousedown", (e)=>{
   const a = getActiveLayer();
   if (!a || a.locked) return;
 
-  if (TOOL==="move"){
-    dragLayer = a;
-  } else if (TOOL==="brush" || TOOL==="eraser"){
-    drawStrokeToLayer(a, e.offsetX, e.offsetY, true);
-  } else if (TOOL==="rect" || TOOL==="ellipse"){
-    shapeStart = {sx:e.offsetX, sy:e.offsetY};
-    shapePreview = null;
-  } else if (TOOL==="text"){
-    // place text on double click (or single click prompt)
-    // We'll support double click by using detail=2 from click; simpler: on mousedown open prompt.
-  }
+  if (TOOL==="move") dragLayer = a;
+  else if (TOOL==="brush" || TOOL==="eraser") drawStrokeToLayer(a, e.offsetX, e.offsetY, true);
+  else if (TOOL==="rect" || TOOL==="ellipse"){ shapeStart={sx:e.offsetX, sy:e.offsetY}; shapePreview=null; }
 });
 
-uiCanvas.addEventListener("mousemove", (e)=>{
-  mouse.x = e.offsetX;
-  mouse.y = e.offsetY;
+uiCanvas.addEventListener("mousemove",(e)=>{
+  mouse.x=e.offsetX; mouse.y=e.offsetY;
 
   if (mouse.down && view.isPanning){
     const dx = e.clientX - view.panStart.x;
     const dy = e.clientY - view.panStart.y;
     view.panX = view.panStart.px + dx;
     view.panY = view.panStart.py + dy;
-    requestRender();
-    return;
+    requestRender(); return;
   }
 
-  if (!mouse.down) { requestRender(); return; }
+  if (!mouse.down){ requestRender(); return; }
 
   const a = getActiveLayer();
   if (!a || a.locked) return;
 
   if (TOOL==="move" && dragLayer){
-    // Move layer by screen delta transformed to doc delta
     const dScreenX = e.offsetX - mouse.lastX;
     const dScreenY = e.offsetY - mouse.lastY;
     dragLayer.x += dScreenX / view.zoom;
@@ -794,60 +645,49 @@ uiCanvas.addEventListener("mousemove", (e)=>{
     requestRender();
   }
 
-  mouse.lastX = e.offsetX;
-  mouse.lastY = e.offsetY;
+  mouse.lastX=e.offsetX; mouse.lastY=e.offsetY;
 });
 
-uiCanvas.addEventListener("mouseup", (e)=>{
-  mouse.down = false;
-  dragLayer = null;
+uiCanvas.addEventListener("mouseup",()=>{
+  mouse.down=false;
+  dragLayer=null;
 
   const a = getActiveLayer();
 
   if ((TOOL==="rect" || TOOL==="ellipse") && shapeStart && shapePreview && a && !a.locked){
     commitShape(a, shapeStart, shapePreview, TOOL);
-    shapeStart = null;
-    shapePreview = null;
+    shapeStart=null; shapePreview=null;
     snapshot("shape");
-  } else {
-    shapeStart = null;
-    shapePreview = null;
-  }
+  } else { shapeStart=null; shapePreview=null; }
 
-  if (TOOL==="brush" || TOOL==="eraser"){
-    snapshot("stroke");
-  }
-  if (TOOL==="move"){
-    snapshot("move");
-  }
+  if (TOOL==="brush" || TOOL==="eraser") snapshot("stroke");
+  if (TOOL==="move") snapshot("move");
 });
 
-uiCanvas.addEventListener("dblclick", (e)=>{
+uiCanvas.addEventListener("dblclick",(e)=>{
   if (TOOL!=="text") return;
   const a = getActiveLayer();
   if (!a || a.locked) return;
+  const t = prompt("Text:", "Label");
+  if (!t) return;
+  const pt = screenToDoc(e.offsetX, e.offsetY);
 
-  const text = prompt("Text:", "Label");
-  if (!text) return;
-
-  const docPt = screenToDoc(e.offsetX, e.offsetY);
   a.ctx.save();
-  a.ctx.globalAlpha = (Number(brushOpacity.value)/100);
+  a.ctx.globalAlpha = Number(brushOpacity.value)/100;
   a.ctx.fillStyle = colorPick.value;
   a.ctx.font = `700 ${Math.max(12, Number(brushSize.value)+6)}px ui-sans-serif, system-ui`;
   a.ctx.textBaseline = "top";
-  a.ctx.fillText(text, docPt.x - a.x, docPt.y - a.y);
+  a.ctx.fillText(t, pt.x - a.x, pt.y - a.y);
   a.ctx.restore();
 
   snapshot("text");
   requestRender();
 });
 
-// Stroke rendering (soft brush)
 function drawStrokeToLayer(layer, sx, sy, isStart){
-  const docPt = screenToDoc(sx, sy);
-  const x = docPt.x - layer.x;
-  const y = docPt.y - layer.y;
+  const pt = screenToDoc(sx, sy);
+  const x = pt.x - layer.x;
+  const y = pt.y - layer.y;
 
   const size = Number(brushSize.value);
   const hard = Number(brushHard.value)/100;
@@ -857,6 +697,7 @@ function drawStrokeToLayer(layer, sx, sy, isStart){
   layer.ctx.globalAlpha = alpha;
   layer.ctx.lineCap = "round";
   layer.ctx.lineJoin = "round";
+  layer.ctx.lineWidth = size;
 
   if (TOOL==="eraser"){
     layer.ctx.globalCompositeOperation = "destination-out";
@@ -866,11 +707,8 @@ function drawStrokeToLayer(layer, sx, sy, isStart){
     layer.ctx.strokeStyle = colorPick.value;
   }
 
-  layer.ctx.lineWidth = size;
-
   if (isStart){
     layer._last = {x,y};
-    // dab
     softDab(layer.ctx, x,y, size, hard, (TOOL==="eraser"));
   } else {
     const last = layer._last || {x,y};
@@ -886,12 +724,10 @@ function drawStrokeToLayer(layer, sx, sy, isStart){
   requestRender();
 }
 
-// Soft dab by drawing radial gradient circle (cheap)
 function softDab(ctx, x,y, size, hard, erasing){
   const r = size/2;
   const g = ctx.createRadialGradient(x,y, r*hard, x,y, r);
   if (erasing){
-    // in destination-out mode, alpha drives erase
     g.addColorStop(0, "rgba(0,0,0,1)");
     g.addColorStop(1, "rgba(0,0,0,0)");
   } else {
@@ -900,15 +736,7 @@ function softDab(ctx, x,y, size, hard, erasing){
     g.addColorStop(1, hexToRgba(c, 0));
   }
   ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x,y,r,0,Math.PI*2);
-  ctx.fill();
-}
-
-function hexToRgba(hex,a){
-  const m = hex.replace("#","").match(/.{1,2}/g);
-  const [r,g,b] = m.map(x=>parseInt(x,16));
-  return `rgba(${r},${g},${b},${a})`;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
 }
 
 function commitShape(layer, start, end, kind){
@@ -920,9 +748,8 @@ function commitShape(layer, start, end, kind){
   const x2 = Math.max(p1.x,p2.x) - layer.x;
   const y2 = Math.max(p1.y,p2.y) - layer.y;
 
-  const alpha = Number(brushOpacity.value)/100;
   layer.ctx.save();
-  layer.ctx.globalAlpha = alpha;
+  layer.ctx.globalAlpha = Number(brushOpacity.value)/100;
   layer.ctx.globalCompositeOperation = "source-over";
   layer.ctx.strokeStyle = colorPick.value;
   layer.ctx.lineWidth = Math.max(2, Number(brushSize.value)/6);
@@ -930,7 +757,6 @@ function commitShape(layer, start, end, kind){
   if (kind==="rect"){
     layer.ctx.strokeRect(x1,y1,x2-x1,y2-y1);
   } else {
-    // ellipse
     layer.ctx.beginPath();
     layer.ctx.ellipse((x1+x2)/2,(y1+y2)/2, Math.abs(x2-x1)/2, Math.abs(y2-y1)/2, 0, 0, Math.PI*2);
     layer.ctx.stroke();
@@ -939,54 +765,260 @@ function commitShape(layer, start, end, kind){
   requestRender();
 }
 
-// ============================================================
-// Rendering pipeline
-// - renderComposite(): merge layers into composite canvas
-// - upload composite to WebGL texture
-// - shader draws to glCanvas with filters
-// - ui canvas draws overlays (shape preview etc.)
-// ============================================================
-
-function renderComposite(){
-  composite.width = doc.w;
-  composite.height = doc.h;
-  ctxC.clearRect(0,0,doc.w,doc.h);
-  ctxC.save();
-  // Background transparent; checkerboard is UI only.
-  // Merge from bottom -> top (layers array is top-first; draw reverse)
-  for (const l of [...layers].reverse()){
-    if (!l.visible) continue;
-    ctxC.globalAlpha = l.opacity;
-    ctxC.drawImage(l.canvas, l.x, l.y);
-  }
-  ctxC.restore();
+function hexToRgba(hex,a){
+  const m = hex.replace("#","").match(/.{1,2}/g);
+  const [r,g,b] = m.map(x=>parseInt(x,16));
+  return `rgba(${r},${g},${b},${a})`;
 }
 
-// UI overlays (shape preview)
+/* ---------------- EXPORT ---------------- */
+btnExport.addEventListener("click", ()=>{
+  renderComposite();
+  uploadComposite();
+  renderGL();
+  const link = document.createElement("a");
+  link.download = "export.png";
+  link.href = (gl ? glCanvas.toDataURL("image/png") : composite.toDataURL("image/png"));
+  link.click();
+});
+
+/* ============================================================
+   WebGL Helpers (FIXED: missing createProgram)
+   ============================================================ */
+function compileShader(gl, type, src) {
+  const sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+    const log = gl.getShaderInfoLog(sh) || "(no log)";
+    gl.deleteShader(sh);
+    throw new Error("Shader compile failed:\n" + log);
+  }
+  return sh;
+}
+function createProgram(gl, vsSrc, fsSrc) {
+  const vs = compileShader(gl, gl.VERTEX_SHADER, vsSrc);
+  const fs = compileShader(gl, gl.FRAGMENT_SHADER, fsSrc);
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  gl.deleteShader(vs);
+  gl.deleteShader(fs);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    const log = gl.getProgramInfoLog(prog) || "(no log)";
+    gl.deleteProgram(prog);
+    throw new Error("Program link failed:\n" + log);
+  }
+  return prog;
+}
+
+/* ---------------- WEBGL PIPELINE ---------------- */
+let gl = null, prog = null, vao = null, tex = null, uni = null;
+
+function initGL(){
+  try{
+    gl = glCanvas.getContext("webgl2", { premultipliedAlpha: true, alpha: true });
+    if (!gl){
+      console.warn("WebGL2 not available; filters disabled (Canvas-only fallback).");
+      gl = null;
+      return;
+    }
+
+    const vs = `#version 300 es
+    precision highp float;
+    in vec2 a_pos;
+    out vec2 v_uv;
+    void main(){
+      v_uv = (a_pos + 1.0) * 0.5;
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }`;
+
+    const fs = `#version 300 es
+    precision highp float;
+    in vec2 v_uv;
+    out vec4 outColor;
+    uniform sampler2D u_tex;
+    uniform vec2 u_texSize;
+
+    uniform float u_bypass;
+    uniform float u_brightness;
+    uniform float u_contrast;
+    uniform float u_saturation;
+    uniform float u_hue;
+    uniform float u_blur;
+    uniform float u_gray;
+    uniform float u_invert;
+
+    mat3 hueMat(float a){
+      float c = cos(a);
+      float s = sin(a);
+      mat3 m = mat3(
+        0.299, 0.587, 0.114,
+        0.596, -0.274, -0.322,
+        0.211, -0.523, 0.312
+      );
+      mat3 inv = inverse(m);
+      mat3 rot = mat3(
+        1.0, 0.0, 0.0,
+        0.0, c, -s,
+        0.0, s,  c
+      );
+      return inv * rot * m;
+    }
+
+    vec3 applyAdjust(vec3 col){
+      col += u_brightness;
+      float cc = u_contrast + 1.0;
+      col = (col - 0.5) * cc + 0.5;
+      float l = dot(col, vec3(0.2126,0.7152,0.0722));
+      col = mix(vec3(l), col, (u_saturation + 1.0));
+      col = hueMat(u_hue) * col;
+
+      if (u_gray > 0.5){
+        float g = dot(col, vec3(0.2126,0.7152,0.0722));
+        col = vec3(g);
+      }
+      if (u_invert > 0.5){
+        col = vec3(1.0) - col;
+      }
+      return col;
+    }
+
+    void main(){
+      vec2 uv = v_uv;
+
+      vec4 base = texture(u_tex, uv);
+
+      if (u_bypass > 0.5){
+        outColor = base;
+        return;
+      }
+
+      vec4 col = base;
+      if (u_blur > 0.001){
+        vec2 px = 1.0 / u_texSize;
+        float r = u_blur;
+        vec2 o1 = px * r;
+        vec2 o2 = px * r * 0.7071;
+
+        vec4 s = texture(u_tex, uv) * 0.24;
+        s += texture(u_tex, uv + vec2( o1.x, 0.0)) * 0.12;
+        s += texture(u_tex, uv + vec2(-o1.x, 0.0)) * 0.12;
+        s += texture(u_tex, uv + vec2(0.0,  o1.y)) * 0.12;
+        s += texture(u_tex, uv + vec2(0.0, -o1.y)) * 0.12;
+
+        s += texture(u_tex, uv + vec2( o2.x,  o2.y)) * 0.07;
+        s += texture(u_tex, uv + vec2(-o2.x,  o2.y)) * 0.07;
+        s += texture(u_tex, uv + vec2( o2.x, -o2.y)) * 0.07;
+        s += texture(u_tex, uv + vec2(-o2.x, -o2.y)) * 0.07;
+        col = s;
+      }
+
+      vec3 adj = applyAdjust(col.rgb);
+      outColor = vec4(adj, col.a);
+    }`;
+
+    prog = createProgram(gl, vs, fs);
+    gl.useProgram(prog);
+
+    vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1,-1,  1,-1, -1, 1,
+      -1, 1,  1,-1,  1, 1
+    ]), gl.STATIC_DRAW);
+
+    const loc = gl.getAttribLocation(prog, "a_pos");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    uni = {
+      texSize: gl.getUniformLocation(prog, "u_texSize"),
+      bypass: gl.getUniformLocation(prog, "u_bypass"),
+      bright: gl.getUniformLocation(prog, "u_brightness"),
+      contrast: gl.getUniformLocation(prog, "u_contrast"),
+      sat: gl.getUniformLocation(prog, "u_saturation"),
+      hue: gl.getUniformLocation(prog, "u_hue"),
+      blur: gl.getUniformLocation(prog, "u_blur"),
+      gray: gl.getUniformLocation(prog, "u_gray"),
+      invert: gl.getUniformLocation(prog, "u_invert"),
+    };
+
+    gl.uniform1i(gl.getUniformLocation(prog,"u_tex"), 0);
+  } catch (err){
+    console.error(err);
+    gl = null; prog=null; vao=null; tex=null; uni=null;
+  }
+}
+
+function uploadComposite(){
+  if (!gl || !tex || !uni) return;
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, composite);
+  gl.uniform2f(uni.texSize, composite.width, composite.height);
+}
+
+function renderGL(){
+  if (!gl || !prog || !vao || !tex || !uni) return;
+
+  const rect = stage.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  glCanvas.width = Math.floor(rect.width * dpr);
+  glCanvas.height = Math.floor(rect.height * dpr);
+
+  gl.viewport(0,0,glCanvas.width, glCanvas.height);
+  gl.clearColor(0,0,0,0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  gl.useProgram(prog);
+  gl.bindVertexArray(vao);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+
+  gl.uniform1f(uni.bypass, bypass ? 1 : 0);
+  gl.uniform1f(uni.bright, Number(fBright.value));
+  gl.uniform1f(uni.contrast, Number(fContrast.value));
+  gl.uniform1f(uni.sat, Number(fSat.value));
+  gl.uniform1f(uni.hue, Number(fHue.value));
+  gl.uniform1f(uni.blur, Number(fBlur.value));
+  gl.uniform1f(uni.gray, fGray.checked ? 1 : 0);
+  gl.uniform1f(uni.invert, fInvert.checked ? 1 : 0);
+
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
+
+/* ---------------- UI OVERLAYS ---------------- */
 function renderUI(){
   const W = uiCanvas.clientWidth;
   const H = uiCanvas.clientHeight;
   ctxUI.clearRect(0,0,W,H);
 
-  // draw a faint bounding box of document area
   const tl = docToScreen(0,0);
   const br = docToScreen(doc.w, doc.h);
+
   ctxUI.save();
   ctxUI.strokeStyle = "rgba(233,236,255,0.28)";
   ctxUI.lineWidth = 1;
   ctxUI.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
   ctxUI.restore();
 
-  // shape preview
   if (shapeStart && shapePreview){
     const p1 = screenToDoc(shapeStart.sx, shapeStart.sy);
     const p2 = screenToDoc(shapePreview.ex, shapePreview.ey);
-
-    const x1 = Math.min(p1.x,p2.x);
-    const y1 = Math.min(p1.y,p2.y);
-    const x2 = Math.max(p1.x,p2.x);
-    const y2 = Math.max(p1.y,p2.y);
-
+    const x1 = Math.min(p1.x,p2.x), y1 = Math.min(p1.y,p2.y);
+    const x2 = Math.max(p1.x,p2.x), y2 = Math.max(p1.y,p2.y);
     const s1 = docToScreen(x1,y1);
     const s2 = docToScreen(x2,y2);
 
@@ -1003,235 +1035,20 @@ function renderUI(){
     ctxUI.restore();
   }
 
-  // cursor hint
   ctxUI.save();
   ctxUI.fillStyle = "rgba(233,236,255,0.75)";
   ctxUI.font = "12px ui-sans-serif, system-ui";
-  ctxUI.textAlign = "left";
   ctxUI.fillText(`Tool: ${TOOL.toUpperCase()}${view.isPanning ? " (PANNING)" : ""}`, 12, 18);
   ctxUI.fillText(`Layer: ${getActiveLayer()?.name ?? "—"}`, 12, 36);
   ctxUI.restore();
 }
 
-// ============================================================
-// WebGL setup (single-pass with optional blur sampling)
-// ============================================================
-let gl, prog, vao, tex, uni;
-function initGL(){
-  gl = glCanvas.getContext("webgl2", { premultipliedAlpha: true, alpha: true });
-  if (!gl){
-    alert("WebGL2 not supported on this browser. Switch to option A (Canvas-only) if needed.");
-    return;
-  }
-
-  const vs = `#version 300 es
-  precision highp float;
-  in vec2 a_pos;
-  out vec2 v_uv;
-  void main(){
-    v_uv = (a_pos + 1.0) * 0.5;
-    gl_Position = vec4(a_pos, 0.0, 1.0);
-  }`;
-
-  const fs = `#version 300 es
-  precision highp float;
-  in vec2 v_uv;
-  out vec4 outColor;
-  uniform sampler2D u_tex;
-  uniform vec2 u_texSize;
-
-  uniform float u_bypass;
-  uniform float u_brightness; // -1..1
-  uniform float u_contrast;   // -1..1
-  uniform float u_saturation; // -1..2 (offset model)
-  uniform float u_hue;        // radians
-  uniform float u_blur;       // px radius (0..8)
-  uniform float u_gray;       // 0/1
-  uniform float u_invert;     // 0/1
-
-  // Hue rotation matrix
-  mat3 hueMat(float a){
-    float c = cos(a);
-    float s = sin(a);
-    // YIQ-ish approximation for rotation
-    mat3 m = mat3(
-      0.299, 0.587, 0.114,
-      0.596, -0.274, -0.322,
-      0.211, -0.523, 0.312
-    );
-    mat3 inv = inverse(m);
-    mat3 rot = mat3(
-      1.0, 0.0, 0.0,
-      0.0, c, -s,
-      0.0, s,  c
-    );
-    return inv * rot * m;
-  }
-
-  vec3 applyAdjust(vec3 col){
-    // brightness
-    col += u_brightness;
-
-    // contrast (centered at 0.5)
-    float c = u_contrast + 1.0;
-    col = (col - 0.5) * c + 0.5;
-
-    // saturation
-    float l = dot(col, vec3(0.2126,0.7152,0.0722));
-    col = mix(vec3(l), col, (u_saturation + 1.0)); // saturation slider as offset
-
-    // hue rotate
-    col = hueMat(u_hue) * col;
-
-    // grayscale
-    if (u_gray > 0.5){
-      float g = dot(col, vec3(0.2126,0.7152,0.0722));
-      col = vec3(g);
-    }
-
-    // invert
-    if (u_invert > 0.5){
-      col = vec3(1.0) - col;
-    }
-
-    return col;
-  }
-
-  vec4 sampleTex(vec2 uv){
-    return texture(u_tex, uv);
-  }
-
-  void main(){
-    vec2 uv = v_uv;
-
-    vec4 base = sampleTex(uv);
-
-    if (u_bypass > 0.5){
-      outColor = base;
-      return;
-    }
-
-    // lightweight blur: 9 taps max (cross + diagonals), scaled by u_blur
-    vec4 col = base;
-    if (u_blur > 0.001){
-      vec2 px = 1.0 / u_texSize;
-      float r = u_blur;
-      vec2 o1 = px * r;
-      vec2 o2 = px * r * 0.7071;
-
-      vec4 s = sampleTex(uv) * 0.24;
-      s += sampleTex(uv + vec2( o1.x, 0.0)) * 0.12;
-      s += sampleTex(uv + vec2(-o1.x, 0.0)) * 0.12;
-      s += sampleTex(uv + vec2(0.0,  o1.y)) * 0.12;
-      s += sampleTex(uv + vec2(0.0, -o1.y)) * 0.12;
-
-      s += sampleTex(uv + vec2( o2.x,  o2.y)) * 0.07;
-      s += sampleTex(uv + vec2(-o2.x,  o2.y)) * 0.07;
-      s += sampleTex(uv + vec2( o2.x, -o2.y)) * 0.07;
-      s += sampleTex(uv + vec2(-o2.x, -o2.y)) * 0.07;
-      col = s;
-    }
-
-    vec3 adj = applyAdjust(col.rgb);
-    outColor = vec4(adj, col.a);
-  }`;
-
-  prog = createProgram(gl, vs, fs);
-  gl.useProgram(prog);
-
-  // Fullscreen quad
-  vao = gl.createVertexArray();
-  gl.bindVertexArray(vao);
-
-  const vbo = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-    -1,-1,  1,-1, -1, 1,
-    -1, 1,  1,-1,  1, 1
-  ]), gl.STATIC_DRAW);
-
-  const loc = gl.getAttribLocation(prog, "a_pos");
-  gl.enableVertexAttribArray(loc);
-  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-
-  tex = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, tex);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-  uni = {
-    texSize: gl.getUniformLocation(prog, "u_texSize"),
-    bypass: gl.getUniformLocation(prog, "u_bypass"),
-    bright: gl.getUniformLocation(prog, "u_brightness"),
-    contrast: gl.getUniformLocation(prog, "u_contrast"),
-    sat: gl.getUniformLocation(prog, "u_saturation"),
-    hue: gl.getUniformLocation(prog, "u_hue"),
-    blur: gl.getUniformLocation(prog, "u_blur"),
-    gray: gl.getUniformLocation(prog, "u_gray"),
-    invert: gl.getUniformLocation(prog, "u_invert"),
-  };
-
-  gl.uniform1i(gl.getUniformLocation(prog,"u_tex"), 0);
-}
-
-// Upload composite canvas to texture (doc size)
-function uploadComposite(){
-  if (!gl) return;
-  gl.bindTexture(gl.TEXTURE_2D, tex);
-  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, composite);
-  gl.uniform2f(uni.texSize, composite.width, composite.height);
-}
-
-function renderGL(){
-  if (!gl) return;
-
-  // Fit GL canvas to stage size
-  const rect = stage.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  glCanvas.width = Math.floor(rect.width * dpr);
-  glCanvas.height = Math.floor(rect.height * dpr);
-
-  gl.viewport(0,0,glCanvas.width, glCanvas.height);
-  gl.clearColor(0,0,0,0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
-  // Set uniforms
-  gl.useProgram(prog);
-  gl.bindVertexArray(vao);
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, tex);
-
-  gl.uniform1f(uni.bypass, bypass ? 1 : 0);
-  gl.uniform1f(uni.bright, Number(fBright.value));
-  gl.uniform1f(uni.contrast, Number(fContrast.value));
-  gl.uniform1f(uni.sat, Number(fSat.value));
-  gl.uniform1f(uni.hue, Number(fHue.value));
-  gl.uniform1f(uni.blur, Number(fBlur.value));
-  gl.uniform1f(uni.gray, fGray.checked ? 1 : 0);
-  gl.uniform1f(uni.invert, fInvert.checked ? 1 : 0);
-
-  // Draw to full canvas. We still need to show doc region with pan/zoom.
-  // Simplest v1: draw full texture to canvas; then we position with CSS overlay is not possible.
-  // Instead we render doc into composite already (doc size), and then draw a "camera" crop in UI layer.
-  // Here we render full composite; UI overlay draws doc bounds. This keeps it simple.
-  gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-  // NOTE: v1 limitation: GL renders full composite stretched to stage.
-  // To align with pan/zoom precisely, we'd implement a transform in shader.
-  // For now we display filtered output as a background and draw edit overlays in correct coords.
-}
-
-// Request render scheduling
-let needs = {composite:true, gl:true, ui:true};
+/* ---------------- RENDER LOOP ---------------- */
 let raf = 0;
 function requestRender(){
   if (raf) return;
   raf = requestAnimationFrame(()=>{
     raf = 0;
-    // Render UI canvas at correct size
     fitUICanvas();
     renderComposite();
     uploadComposite();
@@ -1239,7 +1056,6 @@ function requestRender(){
     renderUI();
   });
 }
-
 function fitUICanvas(){
   const rect = stage.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
@@ -1247,13 +1063,10 @@ function fitUICanvas(){
   uiCanvas.height = Math.floor(rect.height * dpr);
   ctxUI.setTransform(dpr,0,0,dpr,0,0);
 }
-
 window.addEventListener("resize", ()=>requestRender());
 
-// Filter controls
-[
-  fBright,fContrast,fSat,fHue,fBlur,fGray,fInvert
-].forEach(el=>{
+/* ---------------- FILTER CONTROLS ---------------- */
+[fBright,fContrast,fSat,fHue,fBlur,fGray,fInvert].forEach(el=>{
   el.addEventListener("input", ()=>requestRender());
   el.addEventListener("change", ()=>requestRender());
 });
@@ -1275,42 +1088,20 @@ btnResetFilters.addEventListener("click", ()=>{
   requestRender();
 });
 
-// ============================================================
-// Init
-// ============================================================
+/* ---------------- INIT ---------------- */
 function init(){
-  // Start with a base layer
   newLayer("Layer 1");
   resizeDocument(doc.w, doc.h, true);
-  sizeLabel.textContent = `${doc.w}×${doc.h}`;
-
   initGL();
-  renderLayersUI();
-
-  // initial history snapshot
   snapshot("init");
   updateUndoRedoButtons();
   requestRender();
 }
 init();
 
-// ============================================================
-// Helpers
-// ============================================================
-function cryptoId(){
-  return Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2);
-}
-function escapeHtml(s){
-  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-}
-
-// ============================================================
-// IMPORTANT NOTE (v1 pan/zoom vs GL):
-// This v1 shows the filtered composite as a fast background. The edit overlay (UI)
-// uses the true pan/zoom transform, so tool placement is correct.
-// Next iteration: implement pan/zoom in the WebGL shader (uniform transform)
-// so filtered output lines up perfectly with the UI.
-// ============================================================
+/* ---------------- HELPERS ---------------- */
+function cryptoId(){ return Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2); }
+function escapeHtml(s){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;"); }
 </script>
 </body>
 </html>
